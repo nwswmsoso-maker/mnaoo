@@ -7,107 +7,92 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --card: #ffffff; }
+        :root { --gold: #d4af37; --bg: #050505; --card: #ffffff; --red: #ff3b30; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* تنبيه الإرسال */
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 12px 30px; border-radius: 50px; font-weight: bold; z-index: 2000; transition: 0.5s; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-        #toast.show { top: 20px; }
+        /* طبقة تفعيل الصوت الإجبارية */
+        #audio-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        #audio-overlay button { background: var(--gold); color: black; border: none; padding: 20px 40px; border-radius: 50px; font-weight: bold; font-size: 18px; cursor: pointer; }
 
-        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; }
         
-        .nav-bar { display: flex; background: #111; padding: 5px; gap: 5px; }
-        .nav-item { flex: 1; padding: 12px; border: none; background: transparent; color: #555; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; }
-        .nav-item.active { background: var(--gold); color: black; }
+        .nav-bar { display: flex; background: #111; padding: 5px; position: relative; }
+        .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #555; font-weight: bold; position: relative; font-size: 14px; }
+        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
 
-        .container { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; }
+        /* العلامة الرقمية (الاشعار) */
+        .badge { position: absolute; top: 5px; right: 15%; background: var(--red); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; display: none; }
+
+        .container { flex: 1; overflow-y: auto; padding: 15px; }
         .view { display: none; }
         .view.active { display: block; }
 
         /* الكاشير */
-        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .item-btn { background: #1a1a1a; border: 1px solid #333; padding: 20px 5px; border-radius: 12px; text-align: center; font-size: 14px; font-weight: bold; color: #ccc; }
-        .item-btn:active { background: var(--gold); color: black; }
-        
         input#tabNum { width: 100%; background: #000; border: 2px solid #333; color: var(--gold); padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; margin-bottom: 10px; outline: none; }
-        #tempText { background: #111; padding: 15px; border-radius: 10px; margin: 15px 0; min-height: 50px; color: var(--gold); text-align: center; font-weight: bold; border: 1px dashed #333; }
+        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item-btn { background: #1a1a1a; border: 1px solid #333; padding: 20px 5px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ccc; }
+        #tempText { background: #111; padding: 15px; border-radius: 10px; margin: 15px 0; color: var(--gold); text-align: center; font-weight: bold; border: 1px dashed #333; }
+        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; }
 
-        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; cursor: pointer; }
-
-        /* المطبخ */
-        .order-card { background: var(--card); color: black; border-radius: 15px; padding: 20px; margin-bottom: 20px; border-right: 12px solid var(--gold); animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } }
-        .card-header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-        .order-id { background: #000; color: var(--gold); padding: 2px 10px; border-radius: 5px; font-weight: bold; }
-        .items-display { font-size: 26px; font-weight: 900; color: #000; line-height: 1.2; margin: 10px 0; }
-        .btn-done { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; }
-
-        /* زر تفعيل الصوت */
-        #audio-fix { background: #c0392b; color: white; padding: 5px 10px; border-radius: 5px; font-size: 10px; border: none; }
+        /* الكروت */
+        .order-card { background: var(--card); color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); }
+        .items-display { font-size: 24px; font-weight: 900; color: #000; margin: 10px 0; }
+        .btn-done { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="toast">تم الإرسال للمطبخ 🚀</div>
+<div id="audio-overlay">
+    <h2 style="color: var(--gold)">مرحباً بك في الجوهرة 💎</h2>
+    <p>يرجى الضغط لتفعيل أصوات التنبيهات</p>
+    <button onclick="startApp()">تفعيل ودخول 🚀</button>
+</div>
 
-<header>
-    <button id="audio-fix" onclick="enableAudio()">🔊 تفعيل التنبيه</button>
-    <span>الجوهرة POS</span>
-    <span style="font-size: 10px; color: #28a745;">● متصل</span>
-</header>
+<header>نظام الجوهرة POS</header>
 
 <div class="nav-bar">
-    <button id="nav-cashier" class="nav-item active" onclick="showV('cashier')">🛒 الكاشير</button>
-    <button id="nav-kitchen" class="nav-item" onclick="showV('kitchen')">👨‍🍳 المطبخ</button>
-    <button id="nav-ready" class="nav-item" onclick="showV('ready')">✅ الجاهز</button>
+    <button id="n-cashier" class="nav-item active" onclick="showV('cashier')">🛒 الكاشير</button>
+    <button id="n-kitchen" class="nav-item" onclick="showV('kitchen')">👨‍🍳 المطبخ</button>
+    <button id="n-ready" class="nav-item" onclick="showV('ready')">✅ الجاهز <span id="ready-badge" class="badge">0</span></button>
 </div>
 
 <div class="container">
     <div id="cashier" class="view active">
         <input type="number" id="tabNum" placeholder="رقم الطاولة" inputmode="numeric">
         <div class="pos-grid">
-            <div class="item-btn" onclick="add('ستربس')">🍗 ستربس</div>
-            <div class="item-btn" onclick="add('برجر')">🍔 برجر</div>
+            <div class="item-btn" onclick="add('وجبة ستربس')">🍗 ستربس</div>
+            <div class="item-btn" onclick="add('وجبة برجر')">🍔 برجر</div>
             <div class="item-btn" onclick="add('كنتاكي')">🍗 كنتاكي</div>
-            <div class="item-btn" onclick="add('صاج')">🌯 صاج</div>
+            <div class="item-btn" onclick="add('صاج دجاج')">🌯 صاج</div>
             <div class="item-btn" onclick="add('بيتزا')">🍕 بيتزا</div>
             <div class="item-btn" onclick="add('فنجر')">🍟 فنجر</div>
             <div class="item-btn" onclick="add('بيبسي')">🥤 بيبسي</div>
             <div class="item-btn" onclick="add('ماء')">💧 ماء</div>
-            <div class="item-btn" style="color: #e74c3c" onclick="resetPOS()">❌ مسح</div>
+            <div class="item-btn" style="color:red" onclick="resetPOS()">❌ مسح</div>
         </div>
-        <div id="tempText">أختر الطلبات...</div>
+        <div id="tempText">بانتظار الطلبات...</div>
         <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
     </div>
 
-    <div id="kitchen" class="view">
-        <div id="kitchen-list"></div>
-    </div>
-
-    <div id="ready" class="view">
-        <div id="ready-list"></div>
-    </div>
+    <div id="kitchen" class="view"><div id="k-list"></div></div>
+    <div id="ready" class="view"><div id="r-list"></div></div>
 </div>
 
 <script>
-    // أصوات نظام خفيفة
-    const sndSend = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
     const sndIn = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+    const sndReady = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
 
-    // تفعيل الصوت (ضروري جداً للمتصفح)
-    function enableAudio() {
-        sndIn.play().then(() => {
-            document.getElementById('audio-fix').style.background = '#28a745';
-            document.getElementById('audio-fix').innerText = '✅ الصوت يعمل';
-        });
+    function startApp() {
+        sndIn.play().catch(()=>{}); // تفعيل الصوت
+        document.getElementById('audio-overlay').style.display = 'none';
     }
 
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-final-v1'); // قناة جديدة نظيفة
+    const channel = ably.channels.get('jawhara-final-fixed');
     
-    let orderID = 1, currentOrder = [];
+    let orderID = 1, currentOrder = [], readyCount = 0;
 
     function add(item) {
         currentOrder.push(item);
@@ -116,29 +101,23 @@
 
     function sendOrder() {
         const table = document.getElementById('tabNum').value;
-        if(!table || currentOrder.length === 0) return alert("أكمل البيانات!");
+        if(!table || currentOrder.length === 0) return;
 
-        channel.publish('order-msg', {
-            id: orderID++,
-            table: table,
-            items: currentOrder.join(' - '),
-            time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})
-        });
-
-        sndSend.play().catch(()=>{});
-        showToast();
+        channel.publish('order', { id: orderID++, table: table, items: currentOrder.join(' - ') });
         resetPOS();
     }
 
     channel.subscribe((msg) => {
-        if(msg.name === 'order-msg') {
-            render(msg.data, 'kitchen');
-            // يشغل الصوت فقط إذا كان الموبايل بوضع "المطبخ"
-            if(document.getElementById('kitchen').classList.contains('active')) {
-                sndIn.play().catch(()=>{});
-            }
-        } else if(msg.name === 'ready-msg') {
-            render(msg.data, 'ready');
+        if(msg.name === 'order') {
+            render(msg.data, 'k');
+            // تنبيه صوتي للمطبخ
+            if(document.getElementById('kitchen').classList.contains('active')) sndIn.play();
+        } else if(msg.name === 'ready') {
+            render(msg.data, 'r');
+            readyCount++;
+            updateBadge();
+            // تنبيه صوتي للكاشير
+            if(document.getElementById('cashier').classList.contains('active')) sndReady.play();
         }
     });
 
@@ -147,46 +126,51 @@
         const card = document.createElement('div');
         card.className = 'order-card';
         card.innerHTML = `
-            <div class="card-header">
-                <span class="order-id">#${data.id}</span>
-                <span style="font-weight:bold; font-size:18px;">🪑 طاولة ${data.table}</span>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px;">
+                <b>#${data.id}</b> <b>طاولة ${data.table}</b>
             </div>
             <div class="items-display">${data.items}</div>
-            <div style="text-align:left; color:#888; font-size:12px; margin-bottom:10px;">🕒 ${data.time}</div>
-            ${target === 'kitchen' 
+            ${target === 'k' 
                 ? `<button class="btn-done" onclick="markReady(this, ${JSON.stringify(data).replace(/"/g, '&quot;')})">تم التجهيز ✅</button>`
-                : `<button class="btn-done" style="background:#555" onclick="this.parentElement.remove()">تسليم 🏁</button>`
+                : `<button class="btn-done" style="background:#555" onclick="deliver(this)">تسليم 🏁</button>`
             }
         `;
         list.prepend(card);
     }
 
     function markReady(btn, data) {
-        channel.publish('ready-msg', data);
+        channel.publish('ready', data);
         btn.parentElement.remove();
+    }
+
+    function deliver(btn) {
+        btn.parentElement.remove();
+        readyCount = Math.max(0, readyCount - 1);
+        updateBadge();
+    }
+
+    function updateBadge() {
+        const b = document.getElementById('ready-badge');
+        if(readyCount > 0) {
+            b.innerText = readyCount;
+            b.style.display = 'block';
+        } else {
+            b.style.display = 'none';
+        }
     }
 
     function resetPOS() {
         currentOrder = [];
-        document.getElementById('tempText').innerText = "أختر الطلبات...";
+        document.getElementById('tempText').innerText = "تم الإرسال بنجاح ✅";
         document.getElementById('tabNum').value = '';
-    }
-
-    function showToast() {
-        const t = document.getElementById('toast');
-        t.className = 'show';
-        setTimeout(() => t.className = '', 2000);
+        setTimeout(() => { document.getElementById('tempText').innerText = "بانتظار الطلبات..."; }, 2000);
     }
 
     function showV(v) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById(v).classList.add('active');
-        document.getElementById('nav-' + v).classList.add('active');
-        // عند التبديل للمطبخ يفرغ القديم حتى لا تتراكم الطلبات
-        if(v === 'kitchen') {
-            // هنا يمكنك ترك الطلبات أو مسحها حسب رغبتك
-        }
+        document.getElementById('n-' + v).classList.add('active');
     }
 </script>
 </body>
