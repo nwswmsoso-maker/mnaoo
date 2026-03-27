@@ -6,61 +6,82 @@
     <title>الجوهرة الملكي - نظام المطاعم</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --black: #0d0d0d; --gold: #d4af37; --gold-dark: #b8860b; --white: #ffffff; }
+        :root { --black: #0d0d0d; --gold: #d4af37; --white: #ffffff; --light-gray: #f4f4f4; }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--black); font-family: 'Cairo', sans-serif; overflow: hidden; }
 
-        /* الهيدر الملكي */
+        /* الهيدر */
         header { 
             height: 60px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between;
             padding: 0 15px; border-bottom: 2px solid var(--gold); position: relative; z-index: 1000;
         }
-        .menu-btn { font-size: 28px; color: var(--gold); cursor: pointer; }
+        .menu-btn { font-size: 28px; color: var(--gold); cursor: pointer; position: relative; }
+        
+        /* إشعار عدد الطلبات الجاهزة فوق المنيو */
+        .badge {
+            position: absolute; top: -5px; right: -10px; background: red; color: white;
+            font-size: 12px; padding: 2px 6px; border-radius: 50%; display: none;
+        }
         .logo { color: var(--gold); font-weight: bold; font-size: 20px; }
 
-        /* القائمة الجانبية (Sidebar) */
+        /* القائمة الجانبية */
         .sidebar {
             position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
             background: #111; border-left: 2px solid var(--gold); transition: 0.4s ease; z-index: 2000; padding-top: 60px;
         }
         .sidebar.active { right: 0; }
-        .nav-link { padding: 18px 25px; color: var(--gold); font-weight: bold; border-bottom: 1px solid #222; cursor: pointer; display: block; text-decoration: none; }
-        .nav-link:active { background: #222; }
+        .nav-link { padding: 18px 25px; color: var(--gold); font-weight: bold; border-bottom: 1px solid #222; cursor: pointer; display: flex; justify-content: space-between; }
 
         /* الأقسام */
         .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; width: 100%; }
         .page.active { display: block; }
 
-        /* قسم المنيو (الكاشير) */
-        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 150px; }
-        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; }
-        .food-item:active { border-color: var(--gold); background: #222; transform: scale(0.96); }
-        .food-item h4 { margin: 5px 0; color: var(--gold); font-size: 16px; }
+        /* قسم الكاشير */
+        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 160px; }
+        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; color: white; }
+        .food-item h4 { margin: 5px 0; color: var(--gold); }
 
         /* الفاتورة العائمة */
         .floating-cart {
             position: fixed; bottom: 0; width: 100%; background: #fff; color: #000;
             border-radius: 25px 25px 0 0; padding: 15px; box-shadow: 0 -10px 30px rgba(0,0,0,0.7); z-index: 500;
         }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 45px; color: rgba(0,0,0,0.04); font-weight: bold; pointer-events: none; }
 
-        /* قسم المطبخ */
-        .order-card { background: #1a1a1a; border: 1.5px solid var(--gold); border-radius: 12px; padding: 18px; margin-bottom: 15px; position: relative; }
-        .btn-done { background: #2ed573; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; font-size: 16px; }
+        /* شاشة التحضير (ألوان فاتحة وواضحة) */
+        .kitchen-container { display: flex; flex-direction: column; gap: 15px; }
+        .order-card { 
+            background: var(--white); /* خلفية بيضاء لتكون واضحة جداً */
+            color: #000; 
+            border-radius: 12px; padding: 15px; 
+            border-right: 8px solid var(--gold);
+            box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+        }
+        .order-card h3 { margin: 0 0 10px 0; color: #d4af37; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .order-card ul { padding-right: 20px; font-weight: bold; font-size: 18px; }
 
-        /* التنبيهات */
+        .btn-ready { background: #2ed573; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; font-size: 16px; cursor: pointer; }
+
+        /* قائمة الطلبات الجاهزة (قائمة وحدها) */
+        #ready-list-container {
+            background: #1a1a1a; margin-top: 10px; border-radius: 10px; padding: 10px; border: 1px solid var(--gold);
+        }
+        .ready-item { color: #2ed573; padding: 5px; border-bottom: 1px dashed #333; font-weight: bold; }
+
+        /* التنبيه المنبثق */
         #notification-popup {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--gold); color: #000; padding: 15px 25px; border-radius: 50px;
-            font-weight: bold; display: none; z-index: 9999; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            background: var(--gold); color: #000; padding: 12px 20px; border-radius: 50px;
+            font-weight: bold; display: none; z-index: 9999; text-align: center;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="menu-btn" onclick="toggleNav()">☰</div>
+        <div class="menu-btn" onclick="toggleNav()">
+            ☰ <span id="ready-badge" class="badge">0</span>
+        </div>
         <div class="logo">مطعم الجوهرة 💎</div>
         <div style="width:30px"></div>
     </header>
@@ -68,33 +89,38 @@
     <div class="sidebar" id="sidebar">
         <div class="nav-link" onclick="openPage('pos')">🛒 كاشير المبيعات</div>
         <div class="nav-link" onclick="openPage('kds')">👨‍🍳 شاشة التحضير</div>
-        <div class="nav-link" onclick="toggleNav()" style="color:#777">✖ إغلاق</div>
+        <div class="nav-link" style="background:#222; color:white; pointer-events:none;">الطلبات الجاهزة للتسليم:</div>
+        <div id="sidebar-ready-list" style="padding:10px; color:#2ed573; font-size:14px;">
+            لا توجد طلبات جاهزة حالياً
+        </div>
+        <div class="nav-link" onclick="toggleNav()" style="color:#777; border:none; margin-top:20px;">✖ إغلاق القائمة</div>
     </div>
 
     <div id="pos" class="page active">
+        <div id="ready-status-bar" style="background:#2ed573; color:#000; padding:10px; border-radius:10px; margin-bottom:15px; display:none; font-weight:bold; text-align:center;">
+            </div>
+
         <div class="food-grid">
             <div class="food-item" onclick="addToCart('برجر لحم', 7500)"><h4>🍔 برجر لحم</h4><b>7,500</b></div>
             <div class="food-item" onclick="addToCart('زنكر دجاج', 6500)"><h4>🍗 زنكر دجاج</h4><b>6,500</b></div>
             <div class="food-item" onclick="addToCart('صاج دجاج', 5000)"><h4>🌯 صاج دجاج</h4><b>5,000</b></div>
             <div class="food-item" onclick="addToCart('ستربس 5ق', 8500)"><h4>🍟 ستربس</h4><b>8,500</b></div>
-            <div class="food-item" onclick="addToCart('صاج لحم', 6000)"><h4>🌯 صاج لحم</h4><b>6,000</b></div>
-            <div class="food-item" onclick="addToCart('بيبسي عائلي', 2500)"><h4>🥤 بيبسي</h4><b>2,500</b></div>
         </div>
 
         <div class="floating-cart">
-            <div class="watermark">مطعم الجوهرة</div>
             <div id="cart-list" style="max-height: 80px; overflow-y: auto; font-size: 13px;"></div>
             <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; border-top:1px solid #eee; padding-top:8px;">
                 <span>المجموع:</span>
                 <span id="total">0 د.ع</span>
             </div>
-            <button class="btn-done" style="background:var(--gold); color:#000;" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
+            <button class="btn-ready" style="background:var(--gold); color:#000;" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
         </div>
     </div>
 
     <div id="kds" class="page">
-        <h2 style="color:var(--gold); text-align:center;">طلبات المطبخ 👨‍🍳</h2>
-        <div id="kitchen-display"></div>
+        <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">شاشة التحضير 👨‍🍳</h2>
+        <div id="kitchen-display" class="kitchen-container">
+            </div>
     </div>
 
     <div id="notification-popup"></div>
@@ -102,6 +128,7 @@
     <script>
         let cart = [];
         let orders = [];
+        let readyOrders = [];
 
         function toggleNav() { document.getElementById('sidebar').classList.toggle('active'); }
         function openPage(id) {
@@ -119,25 +146,17 @@
             const list = document.getElementById('cart-list');
             list.innerHTML = '';
             let t = 0;
-            cart.forEach(i => {
-                t += i.p;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>${i.n}</span><span>${i.p.toLocaleString()}</span></div>`;
-            });
+            cart.forEach(i => { t += i.p; list.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>${i.n}</span><span>${i.p.toLocaleString()}</span></div>`; });
             document.getElementById('total').innerText = t.toLocaleString() + " د.ع";
         }
 
         function sendOrder() {
             if(!cart.length) return;
-            const id = Math.floor(100 + Math.random() * 899);
+            const id = Math.floor(1 + Math.random() * 99); // أرقام طلبات قصيرة
             orders.push({id, items: [...cart]});
             renderKitchen();
-            cart = []; renderCart(); // تصفير السلة فقط
-            
-            // تنبيه بسيط بدل الطباعة
-            const pop = document.getElementById('notification-popup');
-            pop.innerText = `✅ تم إرسال الطلب #${id} للمطبخ`;
-            pop.style.display = 'block';
-            setTimeout(() => { pop.style.display = 'none'; }, 3000);
+            cart = []; renderCart();
+            alert("تم الإرسال!");
         }
 
         function renderKitchen() {
@@ -146,30 +165,54 @@
             orders.forEach((o, index) => {
                 display.innerHTML += `
                     <div class="order-card">
-                        <h3 style="color:var(--gold); margin-top:0;">طلب #${o.id}</h3>
-                        <ul style="padding-right:20px; font-size:18px;">
-                            ${o.items.map(i => `<li>${i.n}</li>`).join('')}
-                        </ul>
-                        <button class="btn-done" onclick="finishOrder(${index})">تم التحضير ✅</button>
-                    </div>
-                `;
+                        <h3>طلب رقم #${o.id}</h3>
+                        <ul>${o.items.map(i => `<li>${i.n}</li>`).join('')}</ul>
+                        <button class="btn-ready" onclick="finishOrder(${index})">تجهيز الطلب ✅</button>
+                    </div>`;
             });
         }
 
         function finishOrder(index) {
             const order = orders[index];
+            readyOrders.push(order);
             
-            // صوت التنبيه للكاشير
+            // 🔊 الصوت التنبيهي
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
             audio.play();
 
-            const pop = document.getElementById('notification-popup');
-            pop.innerText = `🔔 الطلب #${order.id} جاهز يا كاشير!`;
-            pop.style.display = 'block';
-            setTimeout(() => { pop.style.display = 'none'; }, 6000);
+            // تحديث الواجهة للكاشير
+            updateReadyStatus(order.id);
 
             orders.splice(index, 1);
             renderKitchen();
+        }
+
+        function updateReadyStatus(orderId) {
+            // 1. إظهار شريط في صفحة الكاشير
+            const bar = document.getElementById('ready-status-bar');
+            bar.innerText = `🔔 طلب رقم ${orderId} جاهز!`;
+            bar.style.display = 'block';
+
+            // 2. تحديث الإشعار فوق زر المنيو
+            const badge = document.getElementById('ready-badge');
+            badge.innerText = readyOrders.length;
+            badge.style.display = 'block';
+
+            // 3. تحديث القائمة الجانبية (قائمة الطلبات الجاهزة وحدها)
+            const list = document.getElementById('sidebar-ready-list');
+            if(readyOrders.length === 1) list.innerHTML = '';
+            list.innerHTML += `<div class="ready-item" onclick="deliverOrder(${orderId}, this)">طلب رقم ${orderId} (اضغط للتسليم)</div>`;
+        }
+
+        function deliverOrder(id, element) {
+            readyOrders = readyOrders.filter(o => o.id !== id);
+            element.remove();
+            document.getElementById('ready-badge').innerText = readyOrders.length;
+            if(readyOrders.length === 0) {
+                document.getElementById('ready-badge').style.display = 'none';
+                document.getElementById('ready-status-bar').style.display = 'none';
+                document.getElementById('sidebar-ready-list').innerText = 'لا توجد طلبات جاهزة حالياً';
+            }
         }
     </script>
 </body>
