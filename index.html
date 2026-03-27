@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الجوهرة الملكي</title>
+    <title>نظام الجوهرة الملكي - طاولات</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --black: #0d0d0d; --gold: #d4af37; --white: #ffffff; --green: #2ed573; }
@@ -11,7 +11,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--black); font-family: 'Cairo', sans-serif; overflow: hidden; }
 
-        /* الهيدر */
         header { 
             height: 60px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between;
             padding: 0 15px; border-bottom: 2px solid var(--gold); z-index: 1000; position: relative;
@@ -20,7 +19,6 @@
         .badge { position: absolute; top: -5px; right: -10px; background: red; color: white; font-size: 11px; padding: 2px 6px; border-radius: 50%; display: none; }
         .logo { color: var(--gold); font-weight: bold; font-size: 20px; }
 
-        /* القائمة الجانبية */
         .sidebar {
             position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
             background: #111; border-left: 2px solid var(--gold); transition: 0.4s ease; z-index: 2000; padding-top: 60px;
@@ -28,53 +26,44 @@
         .sidebar.active { right: 0; }
         .nav-link { padding: 18px 25px; color: var(--gold); font-weight: bold; border-bottom: 1px solid #222; cursor: pointer; display: block; }
 
-        /* الأقسام - جعلها قابلة للتمرير بشكل مستقل */
-        .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; width: 100%; -webkit-overflow-scrolling: touch; }
+        .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; width: 100%; }
         .page.active { display: block; }
 
-        /* المنيو */
-        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 180px; }
-        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; color: white; transition: 0.2s; }
-        .food-item:active { transform: scale(0.95); border-color: var(--gold); }
+        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 220px; }
+        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; color: white; }
         .food-item h4 { margin: 5px 0; color: var(--gold); }
 
-        /* منطقة الفاتورة المرتبة */
+        /* منطقة الفاتورة مع رقم الطاولة */
         .cart-footer {
             position: fixed; bottom: 0; width: 100%; background: var(--white); color: #000;
             border-radius: 20px 20px 0 0; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); z-index: 1500;
         }
-        #cart-list { max-height: 70px; overflow-y: auto; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; }
+        .table-input {
+            width: 100%; padding: 10px; border: 2px solid var(--gold); border-radius: 8px;
+            margin-bottom: 10px; font-family: 'Cairo'; font-weight: bold; text-align: center; font-size: 16px;
+        }
+        #cart-list { max-height: 60px; overflow-y: auto; margin-bottom: 5px; font-size: 14px; border-bottom: 1px solid #eee; }
         
-        /* زر الإرسال الملكي */
         .btn-send {
             background: linear-gradient(135deg, #d4af37, #b8860b);
             color: #000; border: none; width: 100%; padding: 14px; border-radius: 12px;
-            font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+            font-size: 18px; font-weight: bold; cursor: pointer;
         }
-        .btn-send:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* شاشة المطبخ (ترتيب الطلبات) */
-        .kitchen-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding-bottom: 30px; }
+        /* كروت المطبخ */
         .order-card { 
-            background: var(--white); color: #000; border-radius: 15px; padding: 20px;
-            border-right: 10px solid var(--gold); box-shadow: 0 4px 12px rgba(255,255,255,0.05);
+            background: var(--white); color: #000; border-radius: 15px; padding: 20px; margin-bottom: 15px;
+            border-right: 12px solid var(--gold); box-shadow: 0 4px 12px rgba(255,255,255,0.05);
         }
-        .order-card h3 { margin: 0 0 10px 0; color: #b8860b; border-bottom: 2px solid #f0f0f0; padding-bottom: 5px; }
-        .order-card ul { padding-right: 25px; font-size: 19px; font-weight: 700; margin: 15px 0; }
-        .btn-ready { background: var(--green); color: #fff; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; }
+        .table-badge { background: #000; color: var(--gold); padding: 4px 12px; border-radius: 5px; font-size: 18px; float: left; }
+        .order-card ul { padding-right: 25px; font-size: 20px; font-weight: 700; margin: 20px 0; }
+        .btn-ready { background: var(--green); color: #fff; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; }
 
-        /* التنبيه الاحترافي (Toast) */
+        /* التنبيه */
         .toast {
             position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
             background: rgba(46, 213, 115, 0.95); color: #fff; padding: 10px 25px;
-            border-radius: 30px; font-weight: bold; z-index: 5000; display: none; animation: fadeInOut 3s forwards;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -20px); }
-            15% { opacity: 1; transform: translate(-50%, 0); }
-            85% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -20px); }
+            border-radius: 30px; font-weight: bold; z-index: 5000; display: none;
         }
     </style>
 </head>
@@ -95,7 +84,7 @@
         <div class="nav-link" onclick="toggleSidebar()" style="color:#666; margin-top:30px;">✖ إغلاق</div>
     </div>
 
-    <div id="toast" class="toast">تم إرسال الطلب للمطبخ 🚀</div>
+    <div id="toast" class="toast"></div>
 
     <div id="pos" class="page active">
         <div class="food-grid">
@@ -108,8 +97,9 @@
         </div>
 
         <div class="cart-footer">
+            <input type="number" id="table-num" class="table-input" placeholder="رقم الطاولة 🪑" min="1">
             <div id="cart-list"></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:18px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold;">
                 <span>إجمالي الحساب:</span>
                 <span id="total">0 د.ع</span>
             </div>
@@ -118,8 +108,8 @@
     </div>
 
     <div id="kds" class="page">
-        <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">طلبات المطبخ الحالية</h2>
-        <div id="kitchen-display" class="kitchen-grid"></div>
+        <h2 style="color:var(--gold); text-align:center;">طلبات المطبخ 👨‍🍳</h2>
+        <div id="kitchen-display"></div>
     </div>
 
     <script>
@@ -128,41 +118,34 @@
         let readyCount = 0;
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-        
         function openPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             toggleSidebar();
         }
 
-        function add(n, p) {
-            cart.push({n, p});
-            renderCart();
-        }
+        function add(n, p) { cart.push({n, p}); renderCart(); }
 
         function renderCart() {
             const list = document.getElementById('cart-list');
             list.innerHTML = '';
             let t = 0;
-            cart.forEach(i => {
-                t += i.p;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>- ${i.n}</span><span>${i.p.toLocaleString()}</span></div>`;
-            });
+            cart.forEach(i => { t += i.p; list.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>- ${i.n}</span><span>${i.p.toLocaleString()}</span></div>`; });
             document.getElementById('total').innerText = t.toLocaleString() + " د.ع";
         }
 
         function sendOrder() {
-            if(!cart.length) return;
+            const tableNum = document.getElementById('table-num').value;
+            if(!cart.length) return showToast("السلة فارغة!", "#ff4757");
+            if(!tableNum) return showToast("يرجى إدخال رقم الطاولة!", "#ff4757");
+
             const id = Math.floor(1 + Math.random() * 99);
-            orders.push({id, items: [...cart]});
+            orders.push({id, table: tableNum, items: [...cart]});
             renderKitchen();
-            cart = []; renderCart();
             
-            // إظهار التنبيه الاحترافي بدل الـ Alert
-            const toast = document.getElementById('toast');
-            toast.innerText = `تم إرسال الطلب #${id} للمطبخ 🚀`;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            showToast(`تم إرسال طلب طاولة ${tableNum} 🚀`, "#2ed573");
+            cart = []; renderCart();
+            document.getElementById('table-num').value = ''; // تصفير رقم الطاولة
         }
 
         function renderKitchen() {
@@ -171,7 +154,8 @@
             orders.forEach((o, index) => {
                 display.innerHTML += `
                     <div class="order-card">
-                        <h3>طلب رقم #${o.id}</h3>
+                        <span class="table-badge">طاولة ${o.table}</span>
+                        <h3 style="margin-bottom:0">طلب #${o.id}</h3>
                         <ul>${o.items.map(i => `<li>${i.n}</li>`).join('')}</ul>
                         <button class="btn-ready" onclick="finishOrder(${index})">تم التحضير ✅</button>
                     </div>`;
@@ -181,18 +165,15 @@
         function finishOrder(index) {
             const order = orders[index];
             readyCount++;
-            
-            // صوت تنبيه
             new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
 
-            // تحديث الإشعارات
             document.getElementById('ready-badge').innerText = readyCount;
             document.getElementById('ready-badge').style.display = 'block';
             
             const sidebarList = document.getElementById('ready-list-sidebar');
             const item = document.createElement('div');
-            item.style.marginBottom = '10px';
-            item.innerHTML = `🔔 طلب #${order.id} جاهز <button onclick="deliver(this)" style="background:none; border:1px solid var(--green); color:var(--green); border-radius:5px; font-size:10px; cursor:pointer;">استلام</button>`;
+            item.style.cssText = "background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:5px; border:1px solid #2ed573;";
+            item.innerHTML = `🔔 طلب طاولة <b>${order.table}</b> جاهز <button onclick="deliver(this)" style="float:left; background:var(--green); border:none; color:white; border-radius:4px; padding:2px 8px; cursor:pointer;">استلام</button><div style="clear:both"></div>`;
             sidebarList.appendChild(item);
 
             orders.splice(index, 1);
@@ -202,11 +183,16 @@
         function deliver(btn) {
             btn.parentElement.remove();
             readyCount--;
-            if(readyCount <= 0) {
-                document.getElementById('ready-badge').style.display = 'none';
-            } else {
-                document.getElementById('ready-badge').innerText = readyCount;
-            }
+            document.getElementById('ready-badge').style.display = readyCount <= 0 ? 'none' : 'block';
+            document.getElementById('ready-badge').innerText = readyCount;
+        }
+
+        function showToast(msg, color) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.background = color;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
