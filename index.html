@@ -3,235 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الجوهرة الملكي - كيبورد داخلي</title>
+    <title>نظام الجوهرة الملكي - ربط داخلي</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* نفس الستايل الملكي السابق */
         :root { --black: #0d0d0d; --gold: #d4af37; --white: #ffffff; --green: #2ed573; }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--black); font-family: 'Cairo', sans-serif; overflow: hidden; }
-
-        header { 
-            height: 60px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; border-bottom: 2px solid var(--gold); z-index: 1000; position: relative;
-        }
-        .menu-btn { font-size: 28px; color: var(--gold); cursor: pointer; position: relative; }
-        .badge { position: absolute; top: -5px; right: -10px; background: red; color: white; font-size: 11px; padding: 2px 6px; border-radius: 50%; display: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Cairo', sans-serif; }
+        body, html { margin: 0; padding: 0; background: var(--black); overflow: hidden; height: 100%; }
+        header { height: 60px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--gold); }
         .logo { color: var(--gold); font-weight: bold; font-size: 20px; }
-
-        .sidebar {
-            position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
-            background: #111; border-left: 2px solid var(--gold); transition: 0.4s ease; z-index: 2000; padding-top: 60px;
-        }
-        .sidebar.active { right: 0; }
-        .nav-link { padding: 18px 25px; color: var(--gold); font-weight: bold; border-bottom: 1px solid #222; cursor: pointer; display: block; }
-
-        .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; width: 100%; }
+        .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; }
         .page.active { display: block; }
-
-        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 250px; }
-        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; color: white; }
-        .food-item h4 { margin: 5px 0; color: var(--gold); }
-
-        .cart-footer {
-            position: fixed; bottom: 0; width: 100%; background: var(--white); color: #000;
-            border-radius: 20px 20px 0 0; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); z-index: 1500;
-        }
-
-        /* حقل رقم الطاولة (جعله غير قابل للكتابة من كيبورد الجهاز) */
-        .table-input {
-            width: 100%; padding: 12px; border: 2px solid var(--gold); border-radius: 10px;
-            margin-bottom: 10px; font-family: 'Cairo'; font-weight: bold; text-align: center; font-size: 18px;
-            background: #fdfdfd; cursor: pointer;
-        }
-
-        /* الكيبورد الرقمي المخصص */
-        .numpad {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: #222;
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 10px;
-            border-top: 3px solid var(--gold); z-index: 3000; transition: 0.3s;
-            transform: translateY(100%); /* مخفي في البداية */
-        }
-        .numpad.active { transform: translateY(0); }
-        .numpad button {
-            background: #333; color: var(--gold); border: none; padding: 15px;
-            font-size: 20px; font-weight: bold; border-radius: 8px; font-family: 'Cairo';
-        }
-        .numpad button:active { background: var(--gold); color: #000; }
-        .btn-close-kb { grid-column: span 3; background: var(--gold) !important; color: #000 !important; margin-top: 5px; }
-
-        #cart-list { max-height: 50px; overflow-y: auto; margin-bottom: 5px; font-size: 13px; border-bottom: 1px solid #eee; }
-        .btn-send { background: linear-gradient(135deg, #d4af37, #b8860b); color: #000; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 18px; font-weight: bold; }
-
-        /* شاشة المطبخ */
-        .kitchen-stats { background: #111; border: 1px solid var(--gold); border-radius: 10px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        .count-circle { background: var(--gold); color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; }
-        .order-card { background: var(--white); color: #000; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-right: 12px solid var(--gold); }
-        .table-badge { background: #000; color: var(--gold); padding: 4px 12px; border-radius: 5px; font-size: 18px; float: left; }
-        .btn-ready { background: var(--green); color: #fff; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 10px; }
-
-        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(46, 213, 115, 0.95); color: #fff; padding: 10px 25px; border-radius: 30px; font-weight: bold; z-index: 5000; display: none; }
+        
+        /* الكاشير */
+        .food-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 250px; }
+        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; color: white; }
+        .cart-footer { position: fixed; bottom: 0; width: 100%; background: var(--white); padding: 15px; border-radius: 20px 20px 0 0; }
+        .btn-send { background: var(--gold); border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        
+        /* المطبخ */
+        .order-card { background: white; color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .kitchen-stats { background: #111; color: var(--gold); padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid var(--gold); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="menu-btn" onclick="toggleSidebar()">
-            ☰ <span id="ready-badge" class="badge">0</span>
-        </div>
-        <div class="logo">مطعم الجوهرة 💎</div>
-        <div style="width:30px"></div>
+        <div onclick="openPage('pos')" style="color:var(--gold); cursor:pointer;">🛒 كاشير</div>
+        <div class="logo">الجوهرة 💎</div>
+        <div onclick="openPage('kds')" style="color:var(--gold); cursor:pointer;">👨‍🍳 مطبخ</div>
     </header>
-
-    <div id="numpad" class="numpad">
-        <button onclick="pressKey('1')">1</button>
-        <button onclick="pressKey('2')">2</button>
-        <button onclick="pressKey('3')">3</button>
-        <button onclick="pressKey('4')">4</button>
-        <button onclick="pressKey('5')">5</button>
-        <button onclick="pressKey('6')">6</button>
-        <button onclick="pressKey('7')">7</button>
-        <button onclick="pressKey('8')">8</button>
-        <button onclick="pressKey('9')">9</button>
-        <button onclick="pressKey('0')">0</button>
-        <button onclick="pressKey('C')" style="background:#555">مسح</button>
-        <button onclick="closeNumpad()" style="background:#444">حفظ</button>
-        <button onclick="closeNumpad()" class="btn-close-kb">تم - إغلاق الكيبورد</button>
-    </div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="nav-link" onclick="openPage('pos')">🛒 كاشير المبيعات</div>
-        <div class="nav-link" onclick="openPage('kds')">👨‍🍳 شاشة المطبخ</div>
-        <div id="ready-list-sidebar" style="padding:15px; color:var(--green); font-size:14px; border-top:1px solid #222;"></div>
-        <div class="nav-link" onclick="toggleSidebar()" style="color:#666; margin-top:30px;">✖ إغلاق</div>
-    </div>
-
-    <div id="toast" class="toast"></div>
 
     <div id="pos" class="page active">
         <div class="food-grid">
-            <div class="food-item" onclick="add('برجر لحم', 7500)"><h4>🍔 برجر لحم</h4><b>7,500</b></div>
-            <div class="food-item" onclick="add('زنكر دجاج', 6500)"><h4>🍗 زنكر دجاج</h4><b>6,500</b></div>
-            <div class="food-item" onclick="add('صاج دجاج', 5000)"><h4>🌯 صاج دجاج</h4><b>5,000</b></div>
-            <div class="food-item" onclick="add('ستربس ملكي', 8500)"><h4>🍟 ستربس</h4><b>8,500</b></div>
-            <div class="food-item" onclick="add('صاج لحم', 6000)"><h4>🌯 صاج لحم</h4><b>6,000</b></div>
-            <div class="food-item" onclick="add('بيبسي', 500)"><h4>🥤 بيبسي</h4><b>500</b></div>
+            <div class="food-item" onclick="add('برجر', 7000)"> برجر 7,000</div>
+            <div class="food-item" onclick="add('صاج', 5000)"> صاج 5,000</div>
+            <div class="food-item" onclick="add('ستربس', 8000)"> ستربس 8,000</div>
+            <div class="food-item" onclick="add('بيبسي', 500)"> بيبسي 500</div>
         </div>
-
         <div class="cart-footer">
-            <input type="text" id="table-num" class="table-input" placeholder="اضغط هنا لإدخال رقم الطاولة 🪑" readonly onclick="showNumpad()">
-            <div id="cart-list"></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold;">
-                <span>إجمالي الحساب:</span>
-                <span id="total">0 د.ع</span>
-            </div>
-            <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ ✨</button>
+            <input type="number" id="tab-num" placeholder="رقم الطاولة" style="width:100%; padding:10px; margin-bottom:10px; border:2px solid var(--gold); border-radius:8px; text-align:center;">
+            <div id="total" style="font-weight:bold; margin-bottom:10px;">المجموع: 0 د.ع</div>
+            <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
         </div>
     </div>
 
     <div id="kds" class="page">
-        <div class="kitchen-stats">
-            <span style="color:var(--gold); font-weight:bold;">الطلبات المنتظرة:</span>
-            <div id="kitchen-count" class="count-circle">0</div>
-        </div>
-        <div id="kitchen-display"></div>
+        <div class="kitchen-stats">طلبات قيد التحضير: <b id="k-count">0</b></div>
+        <div id="k-display"></div>
     </div>
 
     <script>
+        // --- سر الربط المباشر بين الصفحات بدون سيرفر ---
+        const channel = new BroadcastChannel('jawhara_orders');
         let cart = [];
-        let orders = [];
-        let readyCount = 0;
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
 
-        // وظائف الكيبورد الداخلي
-        function showNumpad() { document.getElementById('numpad').classList.add('active'); }
-        function closeNumpad() { document.getElementById('numpad').classList.remove('active'); }
-        function pressKey(key) {
-            let input = document.getElementById('table-num');
-            if(key === 'C') {
-                input.value = '';
-            } else {
-                input.value += key;
-            }
-        }
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
         function openPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            toggleSidebar();
-            closeNumpad();
+            if(id === 'kds') renderKitchen();
         }
 
-        function add(n, p) { cart.push({n, p}); renderCart(); }
-
-        function renderCart() {
-            const list = document.getElementById('cart-list');
-            list.innerHTML = '';
-            let t = 0;
-            cart.forEach(i => { t += i.p; list.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>- ${i.n}</span><span>${i.p.toLocaleString()}</span></div>`; });
-            document.getElementById('total').innerText = t.toLocaleString() + " د.ع";
+        function add(n, p) { cart.push({n, p}); updateCart(); }
+        function updateCart() {
+            let t = cart.reduce((s, i) => s + i.p, 0);
+            document.getElementById('total').innerText = "المجموع: " + t.toLocaleString() + " د.ع";
         }
 
         function sendOrder() {
-            const tableNum = document.getElementById('table-num').value;
-            if(!cart.length) return showToast("السلة فارغة!", "#ff4757");
-            if(!tableNum) return showToast("يرجى إدخال رقم الطاولة!", "#ff4757");
+            let tNum = document.getElementById('tab-num').value;
+            if(!cart.length || !tNum) return alert("أدخل الطلب ورقم الطاولة!");
 
-            const id = Math.floor(1 + Math.random() * 99);
-            orders.push({id, table: tableNum, items: [...cart]});
-            renderKitchen();
+            const order = { id: Date.now(), table: tNum, items: cart };
+            orders.push(order);
             
-            showToast(`تم إرسال طلب طاولة ${tableNum} 🚀`, "#2ed573");
-            cart = []; renderCart();
-            document.getElementById('table-num').value = '';
-            closeNumpad();
+            // حفظ في ذاكرة المتصفح وإرسال إشارة لكل الصفحات المفتوحة
+            localStorage.setItem('orders', JSON.stringify(orders));
+            channel.postMessage({ type: 'NEW_ORDER', order });
+
+            alert("تم الإرسال للمطبخ!");
+            cart = []; updateCart(); document.getElementById('tab-num').value = "";
         }
 
+        // الاستماع للإشارات القادمة من صفحات أخرى
+        channel.onmessage = (event) => {
+            if (event.data.type === 'NEW_ORDER' || event.data.type === 'RELOAD') {
+                orders = JSON.parse(localStorage.getItem('orders')) || [];
+                renderKitchen();
+                if(event.data.type === 'NEW_ORDER') new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
+            }
+        };
+
         function renderKitchen() {
-            const display = document.getElementById('kitchen-display');
-            const counter = document.getElementById('kitchen-count');
+            const display = document.getElementById('k-display');
             display.innerHTML = '';
-            counter.innerText = orders.length;
+            document.getElementById('k-count').innerText = orders.length;
             orders.forEach((o, index) => {
                 display.innerHTML += `
                     <div class="order-card">
-                        <span class="table-badge">طاولة ${o.table}</span>
-                        <h3 style="margin-bottom:0">طلب #${o.id}</h3>
-                        <ul style="padding-right:25px; font-size:20px; font-weight:bold;">${o.items.map(i => `<li>${i.n}</li>`).join('')}</ul>
-                        <button class="btn-ready" onclick="finishOrder(${index})">تم التحضير ✅</button>
+                        <b>طاولة: ${o.table}</b>
+                        <ul>${o.items.map(i => `<li>${i.n}</li>`).join('')}</ul>
+                        <button onclick="finish(${index})" style="width:100%; background:green; color:white; border:none; padding:10px; border-radius:8px;">جاهز ✅</button>
                     </div>`;
             });
         }
 
-        function finishOrder(index) {
-            const order = orders[index];
-            readyCount++;
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
-            document.getElementById('ready-badge').innerText = readyCount;
-            document.getElementById('ready-badge').style.display = 'block';
-            const sidebarList = document.getElementById('ready-list-sidebar');
-            const item = document.createElement('div');
-            item.style.cssText = "background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:5px; border:1px solid #2ed573;";
-            item.innerHTML = `🔔 طاولة <b>${order.table}</b> جاهزة <button onclick="deliver(this)" style="float:left; background:var(--green); border:none; color:white; border-radius:4px; padding:2px 8px; cursor:pointer;">تم</button><div style="clear:both"></div>`;
-            sidebarList.appendChild(item);
+        function finish(index) {
             orders.splice(index, 1);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            channel.postMessage({ type: 'RELOAD' });
             renderKitchen();
         }
 
-        function deliver(btn) {
-            btn.parentElement.remove();
-            readyCount--;
-            document.getElementById('ready-badge').style.display = readyCount <= 0 ? 'none' : 'block';
-            document.getElementById('ready-badge').innerText = readyCount;
-        }
-
-        function showToast(msg, color) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.background = color;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
+        window.onload = renderKitchen;
     </script>
 </body>
 </html>
