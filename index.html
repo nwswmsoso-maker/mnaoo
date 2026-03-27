@@ -2,168 +2,173 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الجوهرة الملكي - Mobile POS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الجوهرة الملكي - نظام المطاعم</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --black: #0d0d0d; --gold: #d4af37; --gold-l: #f1d592; --white: #ffffff; }
+        :root { --black: #0d0d0d; --gold: #d4af37; --gold-dark: #b8860b; --white: #ffffff; }
         
-        body { font-family: 'Cairo', sans-serif; margin: 0; background: var(--black); color: var(--white); overflow-x: hidden; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--black); font-family: 'Cairo', sans-serif; overflow: hidden; }
 
-        /* --- الهيدر والقائمة الجانبية --- */
+        /* الهيدر الملكي */
         header { 
-            background: #1a1a1a; padding: 15px; display: flex; align-items: center; 
-            border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100;
+            height: 60px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 15px; border-bottom: 2px solid var(--gold); position: relative; z-index: 1000;
         }
-        .menu-icon { font-size: 24px; cursor: pointer; color: var(--gold); margin-left: 15px; }
-        
+        .menu-btn { font-size: 28px; color: var(--gold); cursor: pointer; }
+        .logo { color: var(--gold); font-weight: bold; font-size: 20px; }
+
+        /* القائمة الجانبية (Sidebar) */
         .sidebar {
-            position: fixed; top: 0; right: -280px; width: 250px; height: 100%;
-            background: #111; border-left: 2px solid var(--gold); transition: 0.3s; z-index: 200; padding-top: 60px;
+            position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
+            background: #111; border-left: 2px solid var(--gold); transition: 0.4s ease; z-index: 2000; padding-top: 60px;
         }
         .sidebar.active { right: 0; }
-        .nav-item { padding: 15px 25px; border-bottom: 1px solid #222; cursor: pointer; color: var(--gold); font-weight: bold; display: block; }
-        .nav-item:hover { background: #222; }
+        .nav-link { padding: 18px 25px; color: var(--gold); font-weight: bold; border-bottom: 1px solid #222; cursor: pointer; display: block; text-decoration: none; }
+        .nav-link:active { background: #222; }
 
-        /* --- الأقسام --- */
-        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        /* الأقسام */
+        .page { display: none; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; width: 100%; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- واجهة الكاشير (الموبايل) --- */
-        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 100px; }
-        .food-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 10px; text-align: center; }
-        .food-card:active { transform: scale(0.95); border-color: var(--gold); }
-        .food-card h4 { margin: 5px 0; color: var(--gold); font-size: 14px; }
-        
-        /* الفاتورة العائمة (للأسفل في الموبايل) */
-        .cart-bar {
-            position: fixed; bottom: 0; width: 100%; background: var(--white); color: #000;
-            padding: 15px; border-top-right-radius: 20px; border-top-left-radius: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        /* قسم المنيو (الكاشير) */
+        .food-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 150px; }
+        .food-item { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; }
+        .food-item:active { border-color: var(--gold); background: #222; transform: scale(0.96); }
+        .food-item h4 { margin: 5px 0; color: var(--gold); font-size: 16px; }
+
+        /* الفاتورة العائمة */
+        .floating-cart {
+            position: fixed; bottom: 0; width: 100%; background: #fff; color: #000;
+            border-radius: 25px 25px 0 0; padding: 15px; box-shadow: 0 -10px 30px rgba(0,0,0,0.7); z-index: 500;
         }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 45px; color: rgba(0,0,0,0.04); font-weight: bold; pointer-events: none; }
 
-        /* --- واجهة التحضير (المطبخ) --- */
-        .kitchen-card {
-            background: #1a1a1a; border: 1px solid var(--gold); border-radius: 10px; 
-            padding: 15px; margin-bottom: 15px; position: relative;
-        }
-        .status-badge { background: #ff4757; padding: 2px 8px; border-radius: 5px; font-size: 12px; float: left; }
-        .btn-ready { background: #2ed573; color: #fff; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+        /* قسم المطبخ */
+        .order-card { background: #1a1a1a; border: 1.5px solid var(--gold); border-radius: 12px; padding: 18px; margin-bottom: 15px; position: relative; }
+        .btn-done { background: #2ed573; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; font-size: 16px; }
 
-        /* الفاتورة عند الطباعة */
-        @media print {
-            body * { visibility: hidden; }
-            #receipt-print, #receipt-print * { visibility: visible; }
-            #receipt-print { position: absolute; top: 0; left: 0; width: 100%; color: #000; background: #fff; }
-        }
-
-        /* الختم الشفاف */
-        .watermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 40px; color: rgba(0,0,0,0.05); font-weight: bold; border: 3px solid rgba(0,0,0,0.05); padding: 5px; pointer-events: none;
+        /* التنبيهات */
+        #notification-popup {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--gold); color: #000; padding: 15px 25px; border-radius: 50px;
+            font-weight: bold; display: none; z-index: 9999; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
-        <div style="flex:1; text-align:center; font-weight:bold; color:var(--gold);">مطعم الجوهرة 💎</div>
+        <div class="menu-btn" onclick="toggleNav()">☰</div>
+        <div class="logo">مطعم الجوهرة 💎</div>
+        <div style="width:30px"></div>
     </header>
 
     <div class="sidebar" id="sidebar">
-        <div class="nav-item" onclick="showPage('cashier')">🛒 قسم الكاشير</div>
-        <div class="nav-item" onclick="showPage('kitchen')">👨‍🍳 قسم التحضير</div>
-        <div class="nav-item" onclick="toggleSidebar()" style="color:#666;">✖ إغلاق القائمة</div>
+        <div class="nav-link" onclick="openPage('pos')">🛒 كاشير المبيعات</div>
+        <div class="nav-link" onclick="openPage('kds')">👨‍🍳 شاشة التحضير</div>
+        <div class="nav-link" onclick="toggleNav()" style="color:#777">✖ إغلاق</div>
     </div>
 
-    <div id="cashier" class="page active">
+    <div id="pos" class="page active">
         <div class="food-grid">
-            <div class="food-card" onclick="add('برجر لحم', 7500)"><h4>🍔 برجر لحم</h4><b>7,500</b></div>
-            <div class="food-card" onclick="add('زنكر دجاج', 6500)"><h4>🍗 زنكر دجاج</h4><b>6,500</b></div>
-            <div class="food-card" onclick="add('صاج دجاج', 5000)"><h4>🌯 صاج دجاج</h4><b>5,000</b></div>
-            <div class="food-card" onclick="add('ستربس 5ق', 8000)"><h4>🍟 ستربس</h4><b>8,000</b></div>
-            <div class="food-card" onclick="add('صاج لحم', 6000)"><h4>🌯 صاج لحم</h4><b>6,000</b></div>
-            <div class="food-card" onclick="add('بيبسي عائلي', 2500)"><h4>🥤 بيبسي</h4><b>2,500</b></div>
+            <div class="food-item" onclick="addToCart('برجر لحم', 7500)"><h4>🍔 برجر لحم</h4><b>7,500</b></div>
+            <div class="food-item" onclick="addToCart('زنكر دجاج', 6500)"><h4>🍗 زنكر دجاج</h4><b>6,500</b></div>
+            <div class="food-item" onclick="addToCart('صاج دجاج', 5000)"><h4>🌯 صاج دجاج</h4><b>5,000</b></div>
+            <div class="food-item" onclick="addToCart('ستربس 5ق', 8500)"><h4>🍟 ستربس</h4><b>8,500</b></div>
+            <div class="food-item" onclick="addToCart('صاج لحم', 6000)"><h4>🌯 صاج لحم</h4><b>6,000</b></div>
+            <div class="food-item" onclick="addToCart('بيبسي عائلي', 2500)"><h4>🥤 بيبسي</h4><b>2,500</b></div>
         </div>
 
-        <div class="cart-bar" id="receipt-print">
+        <div class="floating-cart">
             <div class="watermark">مطعم الجوهرة</div>
-            <div id="bill-items" style="max-height: 100px; overflow-y: auto; font-size: 14px;">
-                </div>
-            <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; border-top:1px solid #ddd; padding-top:10px;">
+            <div id="cart-list" style="max-height: 80px; overflow-y: auto; font-size: 13px;"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; border-top:1px solid #eee; padding-top:8px;">
                 <span>المجموع:</span>
-                <span id="total-price">0 د.ع</span>
+                <span id="total">0 د.ع</span>
             </div>
-            <button class="btn-ready" style="background:var(--gold); color:#000;" onclick="processOrder()">إرسال وطباعة 🖨️</button>
+            <button class="btn-done" style="background:var(--gold); color:#000;" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
         </div>
     </div>
 
-    <div id="kitchen" class="page">
-        <h3 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:5px;">طلبات قيد التحضير</h3>
-        <div id="kitchen-list">
-            </div>
+    <div id="kds" class="page">
+        <h2 style="color:var(--gold); text-align:center;">طلبات المطبخ 👨‍🍳</h2>
+        <div id="kitchen-display"></div>
     </div>
+
+    <div id="notification-popup"></div>
 
     <script>
         let cart = [];
         let orders = [];
 
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-
-        function showPage(p) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(p).classList.add('active');
-            toggleSidebar();
+        function toggleNav() { document.getElementById('sidebar').classList.toggle('active'); }
+        function openPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            toggleNav();
         }
 
-        function add(n, p) {
+        function addToCart(n, p) {
             cart.push({n, p});
             renderCart();
         }
 
         function renderCart() {
-            const list = document.getElementById('bill-items');
+            const list = document.getElementById('cart-list');
             list.innerHTML = '';
-            let total = 0;
+            let t = 0;
             cart.forEach(i => {
-                total += i.p;
+                t += i.p;
                 list.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>${i.n}</span><span>${i.p.toLocaleString()}</span></div>`;
             });
-            document.getElementById('total-price').innerText = total.toLocaleString() + " د.ع";
+            document.getElementById('total').innerText = t.toLocaleString() + " د.ع";
         }
 
-        function processOrder() {
+        function sendOrder() {
             if(!cart.length) return;
-            const orderId = Math.floor(100 + Math.random() * 899);
-            orders.push({id: orderId, items: [...cart]});
+            const id = Math.floor(100 + Math.random() * 899);
+            orders.push({id, items: [...cart]});
             renderKitchen();
-            window.print();
-            cart = []; renderCart();
-            alert("تم إرسال الطلب للمطبخ بنجاح!");
+            cart = []; renderCart(); // تصفير السلة فقط
+            
+            // تنبيه بسيط بدل الطباعة
+            const pop = document.getElementById('notification-popup');
+            pop.innerText = `✅ تم إرسال الطلب #${id} للمطبخ`;
+            pop.style.display = 'block';
+            setTimeout(() => { pop.style.display = 'none'; }, 3000);
         }
 
         function renderKitchen() {
-            const list = document.getElementById('kitchen-list');
-            list.innerHTML = '';
-            orders.forEach((o, idx) => {
-                list.innerHTML += `
-                    <div class="kitchen-card">
-                        <span class="status-badge">قيد التحضير</span>
-                        <h4 style="color:var(--gold)">طلب #${o.id}</h4>
-                        <ul style="padding-right:15px; font-size:14px;">
+            const display = document.getElementById('kitchen-display');
+            display.innerHTML = '';
+            orders.forEach((o, index) => {
+                display.innerHTML += `
+                    <div class="order-card">
+                        <h3 style="color:var(--gold); margin-top:0;">طلب #${o.id}</h3>
+                        <ul style="padding-right:20px; font-size:18px;">
                             ${o.items.map(i => `<li>${i.n}</li>`).join('')}
                         </ul>
-                        <button class="btn-ready" onclick="done(${idx})">تم التحضير - إبلاغ الكاشير ✅</button>
+                        <button class="btn-done" onclick="finishOrder(${index})">تم التحضير ✅</button>
                     </div>
                 `;
             });
         }
 
-        function done(idx) {
-            const id = orders[idx].id;
-            alert(`🔔 تنبيه للكاشير: الطلب #${id} أصبح جاهزاً!`);
-            orders.splice(idx, 1);
+        function finishOrder(index) {
+            const order = orders[index];
+            
+            // صوت التنبيه للكاشير
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play();
+
+            const pop = document.getElementById('notification-popup');
+            pop.innerText = `🔔 الطلب #${order.id} جاهز يا كاشير!`;
+            pop.style.display = 'block';
+            setTimeout(() => { pop.style.display = 'none'; }, 6000);
+
+            orders.splice(index, 1);
             renderKitchen();
         }
     </script>
