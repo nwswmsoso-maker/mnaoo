@@ -2,365 +2,204 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تجربة طباعة وصل - نظام مطاعمي</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>نظام الجوهرة - الإدارة الملكية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #ff4757;
-            --secondary-color: #2f3542;
-            --bg-color: #f1f2f6;
+            --royal-black: #1a1a1a;
+            --gold: #d4af37;
+            --gold-light: #f1d592;
             --white: #ffffff;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-color);
+            background-color: #000;
             margin: 0;
-            display: grid;
-            grid-template-columns: 380px 1fr; /* الفاتورة يسار والمنيو يمين */
+            display: flex;
             height: 100vh;
+            color: var(--white);
         }
 
-        /* --- قسم الفاتورة (اليسار) --- */
-        .bill-section {
-            background: var(--white);
-            border-left: 2px solid #dfe4ea;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.05);
-            overflow: hidden;
+        /* --- الهيكل العام --- */
+        .pane { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--gold); }
+        .header { 
+            background: linear-gradient(145deg, #222, #000); 
+            color: var(--gold); 
+            padding: 15px; 
+            text-align: center; 
+            border-bottom: 2px solid var(--gold);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* رأس الفاتورة - سيظهر في الطباعة */
-        .receipt-header {
-            display: none; /* مخفي في الشاشة */
-            text-align: center;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .receipt-header h2 { margin: 0 0 5px 0; font-size: 18px; }
-        .receipt-header p { margin: 2px 0; font-size: 12px; }
-
-        .bill-header {
-            border-bottom: 2px dashed #ced4da;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #eee;
-        }
-
-        .item-info h5 { margin: 0; font-size: 14px; }
-        .item-info span { color: var(--primary-color); font-weight: bold; font-size: 12px; }
-
-        .qty-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .qty-btn {
-            background: #dfe4ea;
-            border: none;
-            border-radius: 4px;
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .total-box {
-            background: var(--secondary-color);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 10px;
-        }
-
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 13px; }
-        .grand-total { font-size: 18px; font-weight: bold; color: #7bed9f; border-top: 1px solid #57606f; padding-top: 8px; margin-top: 8px; }
-
-        .btn-checkout, .btn-test {
-            color: white;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-checkout { background: #2ed573; }
-        .btn-checkout:hover { background: #26af61; }
-        .btn-test { background: #3742fa; }
-        .btn-test:hover { background: #2f39d4; }
-
-        /* --- قسم المنيو (اليمين) --- */
-        .menu-section {
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .categories {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .cat-btn {
-            background: var(--white);
-            padding: 8px 20px;
-            border-radius: 25px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: 0.3s;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.03);
-        }
-
-        .cat-btn.active { background: var(--primary-color); color: white; }
-
-        .items-grid {
+        /* --- شاشة الكاشير (يمين) --- */
+        #cashier-section { background: var(--royal-black); }
+        .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 15px;
+            padding: 20px;
+            overflow-y: auto;
         }
 
-        .product-card {
-            background: var(--white);
-            border-radius: 15px;
-            padding: 12px;
+        .food-card {
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 15px;
             text-align: center;
-            transition: 0.3s;
             cursor: pointer;
-            border: 2px solid transparent;
+            transition: 0.3s;
         }
 
-        .product-card:hover { border-color: var(--primary-color); transform: translateY(-3px); }
-        .product-card img { width: 80px; height: 80px; object-fit: contain; }
-        .product-card h4 { margin: 12px 0 3px; color: var(--secondary-color); font-size: 15px; }
-        .product-card p { color: var(--primary-color); font-weight: bold; margin: 0; font-size: 13px; }
+        .food-card:hover { border-color: var(--gold); transform: scale(1.05); background: #2a2a2a; }
+        .food-card h4 { margin: 10px 0 5px; color: var(--gold-light); }
+        .food-card p { color: #fff; font-weight: bold; margin: 0; font-size: 13px; }
 
-        /* =========================================
-           ✨ كود تنسيق الطباعة (Media Query) ✨
-           ========================================= */
+        /* --- الفاتورة والوصل (يسار) --- */
+        #bill-section { 
+            width: 380px; 
+            background: #fff; 
+            color: #000; 
+            padding: 20px; 
+            position: relative;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* ✨ الختم الشفاف ✨ */
+        #bill-section::before {
+            content: "مطعم الجوهرة";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 50px;
+            color: rgba(0, 0, 0, 0.05); /* شفاف جداً */
+            border: 5px solid rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            pointer-events: none;
+            white-space: nowrap;
+            font-weight: bold;
+            z-index: 0;
+        }
+
+        .receipt-content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+        .order-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; }
+
+        .btn-gold {
+            background: linear-gradient(to bottom, var(--gold-light), var(--gold));
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* --- شاشة المطبخ (تظهر عند الطلب) --- */
+        #kitchen-pane { background: #111; border-right: 2px solid var(--gold); }
+        .kitchen-card {
+            background: #222;
+            border: 1px solid var(--gold);
+            margin: 10px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .btn-done { background: #2ed573; color: #fff; border: none; padding: 5px 10px; cursor: pointer; float: left; }
+
         @media print {
-            /* إخفاء كل شيء في الصفحة عدا قسم الفاتورة */
-            body * {
-                visibility: hidden;
-            }
-            .bill-section, .bill-section * {
-                visibility: visible;
-            }
-
-            /* تحديد مكان وحجم الوصل المطبوع */
-            .bill-section {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 80mm; /* العرض القياسي للطابعة الحرارية */
-                height: auto;
-                border: none;
-                box-shadow: none;
-                padding: 5mm;
-                background: white;
-            }
-
-            /* إظهار رأس الفاتورة عند الطباعة */
-            .receipt-header {
-                display: block !important;
-            }
-
-            /* إخفاء العناصر غير المرغوبة في الوصل */
-            .qty-controls, .btn-checkout, .btn-test, .bill-header h2, .bill-header small, .order-item small, .total-box .total-row:not(.grand-total) {
-                display: none !important;
-            }
-
-            /* تنسيق عناصر القائمة في الوصل */
-            .order-item {
-                background: none;
-                border: none;
-                border-bottom: 1px solid #ccc;
-                padding: 5px 0;
-                margin-bottom: 0;
-                border-radius: 0;
-            }
-            .item-info h5 { font-size: 14px; font-weight: bold; }
-            .item-info span { color: #000; font-size: 12px; }
-            .order-item:after { content: attr(data-qty); font-weight: bold; font-size: 14px; margin-right: 10px; } /* إظهار الكمية كطريقة بديلة */
-
-            /* تنسيق المجموع الكلي في الوصل */
-            .total-box {
-                background: none;
-                color: #000;
-                border-top: 2px solid #000;
-                margin-top: 10px;
-                padding: 5px 0;
-            }
-            .grand-total {
-                color: #000;
-                font-size: 18px;
-                border: none;
-                padding: 0;
-            }
+            body * { visibility: hidden; }
+            #bill-section, #bill-section * { visibility: visible; }
+            #bill-section { position: absolute; left: 0; top: 0; width: 80mm; }
+            .no-print { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bill-section" id="print-area">
-        
-        <div class="receipt-header">
-            <h2>مطعم الكوفة العلوي 🍽️</h2>
-            <p>النجف - الكوفة - قرب مسجد السهلة</p>
-            <p>هاتف: 078XXXXXXX</p>
-            <p>التاريخ: <span id="receipt-date"></span></p>
-            <p>---------------------------------</p>
-        </div>
-
-        <div class="bill-header">
-            <h2 style="margin:0; font-size: 20px;">طلب جديد 🧾</h2>
-            <small id="live-clock" style="font-size: 12px; color: #666;"></small>
-        </div>
-
-        <div class="order-list" id="order-list">
-            </div>
-
-        <div class="total-box">
-            <div class="total-row grand-total">
-                <span>المجموع:</span>
-                <span id="grand-total">0 د.ع</span>
-            </div>
-        </div>
-        
-        <button class="btn-checkout">إرسال للمطبخ</button>
-        <button class="btn-test" onclick="printReceipt()">📥 تجربة طباعة الوصل</button>
+    <div class="pane" id="kitchen-pane">
+        <div class="header">👨‍🍳 شاشة التحضير (المطبخ)</div>
+        <div id="kitchen-list" style="overflow-y: auto;"></div>
     </div>
 
-    <div class="menu-section">
-        <div class="categories">
-            <button class="cat-btn active">الكل</button>
-            <button class="cat-btn">الوجبات الرئيسية</button>
-            <button class="cat-btn">مشويات</button>
-            <button class="cat-btn">مشروبات</button>
+    <div class="pane" id="cashier-section">
+        <div class="header">💎 قائمة مطعم الجوهرة الملكية</div>
+        <div class="menu-grid">
+            <div class="food-card" onclick="addItem('برجر لحم ملكي', 7500)"><h4>🍔 برجر لحم</h4><p>7,500 د.ع</p></div>
+            <div class="food-card" onclick="addItem('زنكر حار سبايسي', 6500)"><h4>🍗 زنكر دجاج</h4><p>6,500 د.ع</p></div>
+            <div class="food-card" onclick="addItem('ستربس 5 قطع', 8000)"><h4>🍟 ستربس</h4><p>8,000 د.ع</p></div>
+            <div class="food-card" onclick="addItem('صاج دجاج عملاق', 5000)"><h4>🌯 صاج دجاج</h4><p>5,000 د.ع</p></div>
+            <div class="food-card" onclick="addItem('صاج لحم', 6000)"><h4>🌯 صاج لحم</h4><p>6,000 د.ع</p></div>
+            <div class="food-card" onclick="addItem('بيبسي بارد', 500)"><h4>🥤 بيبسي</h4><p>500 د.ع</p></div>
         </div>
+    </div>
 
-        <div class="items-grid">
-            <div class="product-card" onclick="addToOrder('قوزي لحم عراقي', 15000)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
-                <h4>قوزي لحم عراقي</h4>
-                <p>15,000 د.ع</p>
+    <div id="bill-section">
+        <div class="receipt-content">
+            <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">
+                <h2 style="margin:0">مطعم الجوهرة</h2>
+                <small>للأكلات السريعة والراقية</small>
             </div>
-            <div class="product-card" onclick="addToOrder('كباب حلة (نفر)', 10000)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
-                <h4>كباب حلة (نفر)</h4>
-                <p>10,000 د.ع</p>
-            </div>
-            <div class="product-card" onclick="addToOrder('بيتزا عائلية', 18000)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3595/3595455.png">
-                <h4>بيتزا عائلية</h4>
-                <p>18,000 د.ع</p>
-            </div>
-            <div class="product-card" onclick="addToOrder('سمك مسكوف (كغم)', 25000)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
-                <h4>سمك مسكوف (كغم)</h4>
-                <p>25,000 د.ع</p>
-            </div>
-            <div class="product-card" onclick="addToOrder('بيبسي عائلي', 2500)">
-                <img src="https://cdn-icons-png.flaticon.com/512/2405/2405479.png">
-                <h4>بيبسي عائلي</h4>
-                <p>2,500 د.ع</p>
+            
+            <div id="order-items-list" style="margin-top:20px; flex:1">
+                </div>
+
+            <div style="border-top: 2px solid #000; padding-top: 10px;">
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:20px;">
+                    <span>المجموع:</span>
+                    <span id="total-price">0 د.ع</span>
+                </div>
+                <button class="btn-gold no-print" onclick="sendOrder()" style="width:100%">إرسال وطباعة 🖨️</button>
             </div>
         </div>
     </div>
 
     <script>
-        let cart = [];
+        let currentOrder = [];
 
-        function addToOrder(name, price) {
-            const existingItem = cart.find(item => item.name === name);
-            if (existingItem) {
-                existingItem.qty++;
-            } else {
-                cart.push({ name, price, qty: 1 });
-            }
-            renderOrder();
+        function addItem(name, price) {
+            currentOrder.push({name, price});
+            renderBill();
         }
 
-        function renderOrder() {
-            const list = document.getElementById('order-list');
+        function renderBill() {
+            const list = document.getElementById('order-items-list');
             list.innerHTML = '';
             let total = 0;
-
-            cart.forEach((item, index) => {
-                total += (item.price * item.qty);
-                list.innerHTML += `
-                    <div class="order-item" data-qty="x${item.qty}">
-                        <div class="item-info">
-                            <h5>${item.name} <small style="color:#666; font-weight:normal">(x${item.qty})</small></h5>
-                            <span>${(item.price * item.qty).toLocaleString()} د.ع</span>
-                        </div>
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                            <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                        </div>
-                    </div>
-                `;
+            currentOrder.forEach(item => {
+                total += item.price;
+                list.innerHTML += `<div class="order-item"><span>${item.name}</span> <b>${item.price.toLocaleString()}</b></div>`;
             });
-
-            document.getElementById('grand-total').innerText = total.toLocaleString() + " د.ع";
+            document.getElementById('total-price').innerText = total.toLocaleString() + " د.ع";
         }
 
-        function changeQty(index, delta) {
-            cart[index].qty += delta;
-            if (cart[index].qty <= 0) cart.splice(index, 1);
-            renderOrder();
-        }
+        function sendOrder() {
+            if(currentOrder.length === 0) return alert("السلة فارغة!");
 
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleString('ar-IQ', { hour12: true, hour: '2-digit', minute: '2-digit' });
-            document.getElementById('live-clock').innerText = timeStr;
-            // تحديث التاريخ في رأس الوصل المخفي
-            document.getElementById('receipt-date').innerText = now.toLocaleDateString('ar-IQ') + " " + timeStr;
-        }
-        setInterval(updateClock, 1000); updateClock();
+            // إضافة الطلب لشاشة المطبخ محلياً للتجربة
+            const kList = document.getElementById('kitchen-list');
+            const orderId = Date.now();
+            const card = document.createElement('div');
+            card.className = 'kitchen-card';
+            card.id = `order-${orderId}`;
+            card.innerHTML = `
+                <div style="color:var(--gold)">طلب جديد #${orderId.toString().slice(-4)}</div>
+                <ul style="padding-right:20px">
+                    ${currentOrder.map(i => `<li>${i.name}</li>`).join('')}
+                </ul>
+                <button class="btn-done" onclick="document.getElementById('order-${orderId}').remove()">تم ✅</button>
+                <div style="clear:both"></div>
+            `;
+            kList.prepend(card);
 
-        /* =========================================
-           ✨ وظيفة الطباعة الفعلية ✨
-           ========================================= */
-        function printReceipt() {
-            if(cart.length === 0) {
-                alert("السلة فارغة! أضف أكلات للتجربة.");
-                return;
-            }
-            
-            // فتح نافذة الطباعة الخاصة بالمتصفح
+            // تفعيل الطباعة
             window.print();
+
+            // تصفير الطلب
+            currentOrder = [];
+            renderBill();
         }
     </script>
 </body>
