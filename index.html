@@ -7,62 +7,71 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
-        :root { --gold: #d4af37; --bg: #000; --green: #2ecc71; }
+        :root { --gold: #d4af37; --bg: #000; --green: #2ecc71; --red: #e74c3c; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: white; height: 100vh; overflow: hidden; }
 
-        /* شاشة الاختيار الأولية */
+        /* شاشة الاختيار */
         #role-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-        .role-btn { width: 80%; padding: 30px; border-radius: 20px; border: 2px solid var(--gold); background: #111; color: var(--gold); font-size: 24px; font-weight: bold; cursor: pointer; }
-        .role-btn:active { background: var(--gold); color: #000; }
+        .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--gold); background: #111; color: var(--gold); font-size: 24px; font-weight: bold; }
 
-        /* رسالة التأكيد المرتبة */
-        #success-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 2px solid var(--green); padding: 20px 40px; border-radius: 15px; color: var(--green); font-weight: bold; z-index: 5000; display: none; animation: pop 0.3s ease; }
-        @keyframes pop { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } }
+        /* رسالة النجاح */
+        #success-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 2px solid var(--green); padding: 20px 40px; border-radius: 15px; color: var(--green); font-weight: bold; z-index: 5000; display: none; }
 
-        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; }
-        .nav-bar { display: flex; background: #111; border-bottom: 1px solid #222; }
+        header { padding: 12px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; }
+        
+        .nav-bar { display: none; background: #111; border-bottom: 1px solid #222; }
         .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #555; font-weight: bold; }
-        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .nav-item.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
 
-        .container { padding: 15px; height: calc(100vh - 110px); overflow-y: auto; }
+        .container { padding: 15px; height: calc(100vh - 100px); overflow-y: auto; }
         .view { display: none; }
         .view.active { display: block; }
 
-        /* تصميم الكاشير */
-        input#tabNum { width: 100%; background: #111; border: 1px solid #333; color: var(--gold); padding: 15px; border-radius: 10px; text-align: center; font-size: 26px; margin-bottom: 15px; outline: none; }
-        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .item-btn { background: #1a1a1a; border: 1px solid #333; padding: 20px 5px; border-radius: 10px; text-align: center; font-size: 14px; font-weight: bold; color: #ccc; }
-        #orderSummary { background: #111; padding: 15px; border-radius: 10px; margin: 15px 0; color: var(--gold); text-align: center; font-size: 18px; border: 1px dashed #444; min-height: 60px; }
-        .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; box-shadow: 0 4px 15px rgba(212,175,55,0.2); }
+        /* لوحة الجاهز للكاشير */
+        #ready-board { background: #111; border: 1px solid #333; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: none; }
+        #ready-board h4 { margin: 0 0 10px 0; font-size: 14px; color: var(--green); text-align: center; }
+        .ready-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .tag { background: var(--green); color: white; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 18px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-        /* تصميم الكروت */
-        .order-card { background: white; color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .card-items { font-size: 26px; font-weight: 900; margin: 10px 0; color: #000; }
+        /* واجهة الكاشير */
+        input#tabNum { width: 100%; background: #000; border: 1px solid #333; color: var(--gold); padding: 15px; border-radius: 10px; text-align: center; font-size: 24px; margin-bottom: 15px; outline: none; }
+        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item-btn { background: #1a1a1a; border: 1px solid #333; padding: 18px 5px; border-radius: 10px; text-align: center; font-size: 14px; font-weight: bold; color: #eee; }
+        #orderSummary { background: #0a0a0a; padding: 15px; border-radius: 10px; margin: 15px 0; color: var(--gold); text-align: center; border: 1px dashed #444; min-height: 50px; }
+        .btn-send { width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; }
+
+        /* الكروت للمطبخ */
+        .order-card { background: white; color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); }
+        .card-items { font-size: 28px; font-weight: 900; margin: 10px 0; line-height: 1.2; }
         .btn-done { width: 100%; padding: 15px; background: var(--green); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div id="role-selector">
-    <h2 style="color:var(--gold)">مرحباً بك في الجوهرة 💎</h2>
-    <p>يرجى اختيار واجهة العمل:</p>
-    <button class="role-btn" onclick="startApp('cashier')">🛒 الكاشير (الطلبات)</button>
-    <button class="role-btn" onclick="startApp('kitchen')">👨‍🍳 المطبخ (الاستلام)</button>
+    <h1 style="color:var(--gold)">الجوهرة 💎</h1>
+    <button class="role-btn" onclick="init('cashier')">🛒 واجهة الكاشير</button>
+    <button class="role-btn" onclick="init('kitchen')">👨‍🍳 واجهة المطبخ</button>
 </div>
 
-<div id="success-msg">تم إرسال الطلب بنجاح ✨</div>
+<div id="success-msg">تم الإرسال 🚀</div>
 
-<header>الجوهرة POS 💎</header>
+<header id="h-title">الجوهرة POS</header>
 
-<div class="nav-bar">
-    <button id="n-cashier" class="nav-item active" onclick="showV('cashier')">🛒 الكاشير</button>
-    <button id="n-kitchen" class="nav-item" onclick="showV('kitchen')">👨‍🍳 المطبخ</button>
-    <button id="n-ready" class="nav-item" onclick="showV('ready')">✅ الجاهز</button>
+<div id="nav" class="nav-bar">
+    <button id="n-cashier" class="nav-item active" onclick="go('cashier')">🛒 الطلبات</button>
+    <button id="n-kitchen" class="nav-item" onclick="go('kitchen')">👨‍🍳 المطبخ</button>
 </div>
 
 <div class="container">
-    <div id="cashier" class="view active">
+    <div id="cashier" class="view">
+        <div id="ready-board">
+            <h4>✅ طاولات جاهزة للتسليم:</h4>
+            <div id="ready-list-cashier" class="ready-tags"></div>
+        </div>
+
         <input type="number" id="tabNum" placeholder="رقم الطاولة" inputmode="numeric">
         <div class="pos-grid">
             <div class="item-btn" onclick="add('ستربس')">🍗 ستربس</div>
@@ -73,97 +82,103 @@
             <div class="item-btn" onclick="add('فنجر')">🍟 فنجر</div>
             <div class="item-btn" onclick="add('بيبسي')">🥤 بيبسي</div>
             <div class="item-btn" onclick="add('ماء')">💧 ماء</div>
-            <div class="item-btn" style="color:#e74c3c" onclick="reset()">❌ مسح</div>
+            <div class="item-btn" style="color:var(--red)" onclick="reset()">❌ مسح</div>
         </div>
-        <div id="orderSummary">بانتظار اختيار الأكل...</div>
-        <button class="btn-send" onclick="send()">إرسال الطلب للمطبخ 🚀</button>
+        <div id="orderSummary">أختر الطلبات...</div>
+        <button class="btn-send" onclick="send()">إرسال للمطبخ 🚀</button>
     </div>
 
     <div id="kitchen" class="view"><div id="k-list"></div></div>
-    <div id="ready" class="view"><div id="r-list"></div></div>
 </div>
 
 <script>
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v12-final');
+    const channel = ably.channels.get('jawhara-v14');
     
-    let currentItems = [];
+    let items = [];
+    let role = '';
 
-    // دالة بدء التطبيق واختيار الدور
-    function startApp(role) {
-        // تفعيل الصوت
+    function init(r) {
+        role = r;
         bell.play().then(() => { bell.pause(); bell.currentTime = 0; });
-        
         document.getElementById('role-selector').style.display = 'none';
-        showV(role);
-
-        // إذا اختار مطبخ، نظف أي طلبات قديمة كانت معلكة
+        document.getElementById('nav').style.display = 'flex';
+        
         if(role === 'kitchen') {
-            document.getElementById('k-list').innerHTML = '';
+            document.getElementById('n-cashier').style.display = 'none';
+            document.getElementById('h-title').innerText = 'المطبخ 👨‍🍳';
+            go('kitchen');
+        } else {
+            document.getElementById('n-kitchen').style.display = 'none';
+            document.getElementById('h-title').innerText = 'الكاشير 🛒';
+            go('cashier');
         }
     }
 
-    function add(item) {
-        currentItems.push(item);
-        document.getElementById('orderSummary').innerText = currentItems.join(' + ');
-    }
+    function add(i) { items.push(i); document.getElementById('orderSummary').innerText = items.join(' + '); }
 
     function send() {
-        const table = document.getElementById('tabNum').value;
-        if(!table || currentItems.length === 0) return;
-
-        channel.publish('order', { table: table, items: currentItems.join(' - ') });
-        
-        // تشغيل الجرس وإظهار رسالة النجاح
+        const t = document.getElementById('tabNum').value;
+        if(!t || items.length === 0) return;
+        channel.publish('msg', { type: 'new', table: t, items: items.join(' - ') });
         bell.play().catch(()=>{});
-        const msg = document.getElementById('success-msg');
-        msg.style.display = 'block';
-        setTimeout(() => { msg.style.display = 'none'; }, 2000);
-
+        document.getElementById('success-msg').style.display = 'block';
+        setTimeout(() => { document.getElementById('success-msg').style.display = 'none'; }, 1500);
         reset();
     }
 
     channel.subscribe((msg) => {
-        if(msg.name === 'order') {
-            draw(msg.data, 'k');
-            if(document.getElementById('kitchen').classList.contains('active')) bell.play().catch(()=>{});
-        } else if(msg.name === 'ready') {
-            draw(msg.data, 'r');
-            if(document.getElementById('cashier').classList.contains('active')) bell.play().catch(()=>{});
+        const d = msg.data;
+        if(d.type === 'new') {
+            if(role === 'kitchen') {
+                draw(d, 'kitchen');
+                bell.play().catch(()=>{});
+            }
+        } else if(d.type === 'ready') {
+            if(role === 'cashier') {
+                addToReadyBoard(d.table);
+                bell.play().catch(()=>{});
+            }
         }
     });
 
     function draw(d, target) {
-        const list = document.getElementById(target + '-list');
+        const list = document.getElementById('k-list');
         const card = document.createElement('div');
         card.className = 'order-card';
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee;">
-                <span style="font-weight:bold; font-size:18px;">طاولة ${d.table}</span>
-            </div>
+            <div style="font-weight:bold; font-size:20px; border-bottom:1px solid #eee;">طاولة ${d.table}</div>
             <div class="card-items">${d.items}</div>
-            ${target === 'k' 
-                ? `<button class="btn-done" onclick="finish(this, ${JSON.stringify(d).replace(/"/g, '&quot;')})">تم التجهيز ✅</button>`
-                : `<button class="btn-done" style="background:#555" onclick="this.parentElement.remove()">تم التسليم 🏁</button>`
-            }
+            <button class="btn-done" onclick="markReady(this, '${d.table}')">تم التجهيز ✅</button>
         `;
         list.prepend(card);
     }
 
-    function finish(btn, d) {
-        channel.publish('ready', d);
+    function markReady(btn, table) {
+        channel.publish('msg', { type: 'ready', table: table });
         btn.parentElement.remove();
     }
 
-    function reset() {
-        currentItems = [];
-        document.getElementById('orderSummary').innerText = "بانتظار اختيار الأكل...";
-        document.getElementById('tabNum').value = '';
+    function addToReadyBoard(table) {
+        document.getElementById('ready-board').style.display = 'block';
+        const list = document.getElementById('ready-list-cashier');
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerText = "طاولة " + table;
+        tag.onclick = function() { this.remove(); checkBoard(); };
+        list.appendChild(tag);
     }
 
-    function showV(v) {
+    function checkBoard() {
+        const list = document.getElementById('ready-list-cashier');
+        if(list.children.length === 0) document.getElementById('ready-board').style.display = 'none';
+    }
+
+    function reset() { items = []; document.getElementById('orderSummary').innerText = "أختر الطلبات..."; document.getElementById('tabNum').value = ''; }
+
+    function go(v) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById(v).classList.add('active');
