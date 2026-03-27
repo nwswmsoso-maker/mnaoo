@@ -3,136 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الجوهرة السحابي 💎</title>
+    <title>نظام الجوهرة 💎 - النسخة المطورة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
-
     <style>
-        :root { --gold: #d4af37; --black: #0d0d0d; --white: #ffffff; }
+        :root { --gold: #d4af37; --black: #0d0d0d; --white: #ffffff; --dark-grey: #1a1a1a; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--black); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 15px; background: #1a1a1a; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .nav { display: flex; background: #222; }
-        .nav button { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .nav button.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
-        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
-        .page.active { display: block; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: var(--gold); font-size: 14px; }
-        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; text-align: center; font-size: 18px; outline: none; }
-        input:focus { border-color: var(--gold); }
-        .btn-send { width: 100%; padding: 18px; border-radius: 15px; background: var(--gold); color: #000; font-weight: bold; font-size: 20px; cursor: pointer; border: none; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
-        .btn-send:active { transform: scale(0.98); }
-        .order-card { background: white; color: black; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); animation: slideIn 0.4s ease-out; position: relative; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        .order-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 10px; }
-        .btn-done { width: 100%; background: #28a745; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        header { padding: 12px; background: var(--dark-grey); text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; }
+        
+        .mode-selector { display: flex; gap: 8px; padding: 10px; background: #222; }
+        .mode-btn { flex: 1; padding: 12px; border: 2px solid var(--gold); background: transparent; color: var(--gold); border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .mode-btn.active { background: var(--gold); color: black; }
+
+        .view { display: none; flex: 1; padding: 15px; overflow-y: auto; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* تنسيق الكاشير الذكي */
+        .menu-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .food-item { background: #333; border: 1px solid #444; color: white; padding: 12px 5px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .food-item:active { background: var(--gold); color: black; transform: scale(0.95); }
+        .food-item.drink { border-color: #3498db; color: #3498db; }
+        
+        #tabNum { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--gold); background: #000; color: #fff; text-align: center; font-size: 20px; }
+        #orderTextarea { width: 100%; height: 80px; padding: 10px; border-radius: 10px; background: #111; color: var(--gold); border: 1px solid #444; margin-bottom: 10px; font-size: 16px; resize: none; }
+        .btn-send { width: 100%; padding: 18px; border-radius: 15px; background: #28a745; color: white; font-weight: bold; font-size: 20px; border: none; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
+
+        /* تنسيق المطبخ */
+        .order-card { background: white; color: black; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-right: 12px solid var(--gold); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-done { width: 100%; background: #000; color: white; border: none; padding: 12px; border-radius: 10px; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<header>مطعم الجوهرة 💎</header>
+<header>نظام الجوهرة السحابي 💎</header>
 
-<div class="nav">
-    <button id="t-pos" class="active" onclick="show('pos')">🛒 الكاشير</button>
-    <button id="t-kds" onclick="show('kds')">👨‍🍳 المطبخ</button>
+<div class="mode-selector">
+    <button id="btn-cashier" class="mode-btn active" onclick="switchView('cashier')">🛒 الكاشير</button>
+    <button id="btn-kitchen" class="mode-btn" onclick="switchView('kitchen')">👨‍🍳 المطبخ</button>
 </div>
 
-<div id="pos" class="page active">
-    <div class="input-group">
-        <label>رقم الطاولة</label>
-        <input type="number" id="tabNum" placeholder="مثلاً: 5" inputmode="numeric">
+<div id="cashier-view" class="view active">
+    <input type="number" id="tabNum" placeholder="رقم الطاولة 🪑" inputmode="numeric">
+    
+    <label style="color:var(--gold); font-size:12px;">الوجبات الرئيسية:</label>
+    <div class="menu-section">
+        <div class="food-item" onclick="addToOrder('وجبة ستربس')">🍗 ستربس</div>
+        <div class="food-item" onclick="addToOrder('وجبة برجر')">🍔 برجر</div>
+        <div class="food-item" onclick="addToOrder('وجبة كنتاكي')">🍗 كنتاكي</div>
+        <div class="food-item" onclick="addToOrder('صاج دجاج')">🌯 صاج دجاج</div>
+        <div class="food-item" onclick="addToOrder('صاج لحم')">🌯 صاج لحم</div>
+        <div class="food-item" onclick="addToOrder('بيتزا')">🍕 بيتزا</div>
     </div>
-    <div class="input-group">
-        <label>الطلبات</label>
-        <input type="text" id="orderItems" placeholder="مثلاً: 2 همبرجر، 1 كولا">
+
+    <label style="color:var(--gold); font-size:12px;">إضافات ومشروبات:</label>
+    <div class="menu-section">
+        <div class="food-item drink" onclick="addToOrder('بيبسي')">🥤 بيبسي</div>
+        <div class="food-item drink" onclick="addToOrder('سفن أب')">🥤 سفن</div>
+        <div class="food-item drink" onclick="addToOrder('ماء')">💧 ماء</div>
+        <div class="food-item" onclick="addToOrder('فنجر')">🍟 فنجر</div>
+        <div class="food-item" onclick="addToOrder('كبة')">🧆 كبة</div>
+        <div class="food-item" style="color:#e74c3c; border-color:#e74c3c" onclick="document.getElementById('orderTextarea').value = ''">❌ مسح</div>
     </div>
+
+    <textarea id="orderTextarea" placeholder="الطلبات المختارة تظهر هنا..." readonly></textarea>
     <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
 </div>
 
-<div id="kds" class="page">
-    <div id="k-list">
-        <p style="text-align:center; color:#555; margin-top: 50px;">بانتظار الطلبات الجديدة...</p>
+<div id="kitchen-view" class="view">
+    <div id="orders-list">
+        <p style="text-align:center; color:#555; margin-top:50px;">بانتظار طلبات الزبائن...</p>
     </div>
 </div>
 
 <script>
-    // --- الربط بمفتاحك الخاص ---
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
-    
     const ably = new Ably.Realtime(ABLY_KEY);
     const channel = ably.channels.get('al-jawhara-orders');
+    let currentView = 'cashier';
 
-    // تشغيل الصوت عند التنبيه
-    const alertSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    function addToOrder(item) {
+        const area = document.getElementById('orderTextarea');
+        if(area.value.includes(item)) {
+             // إذا موجود يضيف "مكرر" أو يكتفي بالتنبيه، هنا سنضيفه مرة ثانية بفاصلة
+             area.value += " + " + item;
+        } else {
+             area.value += (area.value ? "، " : "") + item;
+        }
+    }
 
-    // 1. استقبال الطلبات (للمطبخ)
     channel.subscribe('new-order', (message) => {
-        const data = message.data;
-        const list = document.getElementById('k-list');
-        
-        // مسح رسالة "بانتظار الطلبات"
-        if(list.querySelector('p')) list.innerHTML = '';
+        if (currentView === 'kitchen') {
+            const data = message.data;
+            const list = document.getElementById('orders-list');
+            if(list.querySelector('p')) list.innerHTML = '';
 
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        const time = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-        
-        card.innerHTML = `
-            <div class="order-header">
-                <span style="font-weight:bold; font-size:18px;">🪑 طاولة ${data.table}</span>
-                <span style="color:#666; font-size:12px;">🕒 ${time}</span>
-            </div>
-            <div style="font-size:19px; margin:10px 0; color:#333;">${data.items}</div>
-            <button class="btn-done" onclick="completeOrder(this)">تم التحضير ✅</button>
-        `;
-        list.prepend(card);
-        
-        // تنبيه صوتي
-        alertSound.play().catch(e => console.log("صوت التنبيه يحتاج تفاعل أولاً"));
+            const card = document.createElement('div');
+            card.className = 'order-card';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    <b style="font-size:20px;">🪑 طاولة ${data.table}</b>
+                    <small style="color:red;">جديد 🔔</small>
+                </div>
+                <p style="font-size:22px; margin:15px 0; font-weight:bold; color:#000;">${data.items}</p>
+                <button class="btn-done" onclick="completeOrder(this)">تم التجهيز ✅</button>
+            `;
+            list.prepend(card);
+            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{});
+        }
     });
 
-    // 2. إرسال الطلبات (للكاشير)
     function sendOrder() {
         const table = document.getElementById('tabNum').value;
-        const items = document.getElementById('orderItems').value;
+        const items = document.getElementById('orderTextarea').value;
+        if(!table || !items) return alert("اختر الطاولة والأكل أولاً!");
 
-        if(!table || !items) {
-            alert("عذراً، يرجى كتابة رقم الطاولة والطلبات أولاً!");
-            return;
-        }
-
-        channel.publish('new-order', { table: table, items: items }, (err) => {
-            if(err) {
-                alert("فشل الإرسال! تأكد من الاتصال بالإنترنت.");
-            } else {
-                alert("تم إرسال الطلب للمطبخ بنجاح! ✨");
-                document.getElementById('orderItems').value = '';
-                document.getElementById('tabNum').value = '';
-            }
-        });
+        channel.publish('new-order', { table, items });
+        alert("وصل الطلب للمطبخ! ✅");
+        document.getElementById('orderTextarea').value = '';
+        document.getElementById('tabNum').value = '';
     }
 
-    // وظائف إضافية
     function completeOrder(btn) {
-        btn.parentElement.style.opacity = '0.5';
-        btn.innerText = 'تم الإنجاز ✨';
-        btn.disabled = true;
-        setTimeout(() => btn.parentElement.remove(), 1000);
+        btn.parentElement.style.background = '#dff0d8';
+        setTimeout(() => btn.parentElement.remove(), 500);
     }
 
-    function show(p) {
-        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav button').forEach(el => el.classList.remove('active'));
-        document.getElementById(p).classList.add('active');
-        document.getElementById('t-' + p).classList.add('active');
+    function switchView(view) {
+        currentView = view;
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(view + '-view').classList.add('active');
+        document.getElementById('btn-' + view).classList.add('active');
     }
-
-    // التأكد من حالة الاتصال
-    ably.connection.on('connected', () => {
-        console.log("متصل بالسحاب بنجاح! ✅");
-    });
 </script>
 </body>
 </html>
