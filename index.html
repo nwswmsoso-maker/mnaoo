@@ -11,45 +11,38 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* طبقة تفعيل الصوت الإجبارية */
-        #audio-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        #audio-overlay button { background: var(--gold); color: black; border: none; padding: 20px 40px; border-radius: 50px; font-weight: bold; font-size: 18px; cursor: pointer; }
-
-        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; }
+        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); font-weight: bold; font-size: 18px; }
         
-        .nav-bar { display: flex; background: #111; padding: 5px; position: relative; }
-        .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #555; font-weight: bold; position: relative; font-size: 14px; }
-        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .nav-bar { display: flex; background: #111; padding: 5px; position: relative; border-bottom: 1px solid #222; }
+        .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #666; font-weight: bold; position: relative; font-size: 14px; transition: 0.3s; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 3px; background: var(--gold); border-radius: 10px; }
 
-        /* العلامة الرقمية (الاشعار) */
-        .badge { position: absolute; top: 5px; right: 15%; background: var(--red); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; display: none; }
+        /* العلامة الرقمية فوق كلمة الجاهز */
+        .badge { position: absolute; top: 8px; right: 10px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; display: none; font-weight: bold; border: 1px solid black; }
 
         .container { flex: 1; overflow-y: auto; padding: 15px; }
         .view { display: none; }
         .view.active { display: block; }
 
-        /* الكاشير */
-        input#tabNum { width: 100%; background: #000; border: 2px solid #333; color: var(--gold); padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; margin-bottom: 10px; outline: none; }
+        /* واجهة الكاشير */
+        input#tabNum { width: 100%; background: #000; border: 2px solid #333; color: var(--gold); padding: 15px; border-radius: 15px; text-align: center; font-size: 24px; margin-bottom: 15px; outline: none; }
         .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .item-btn { background: #1a1a1a; border: 1px solid #333; padding: 20px 5px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ccc; }
-        #tempText { background: #111; padding: 15px; border-radius: 10px; margin: 15px 0; color: var(--gold); text-align: center; font-weight: bold; border: 1px dashed #333; }
-        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; }
+        .item-btn { background: #151515; border: 1px solid #333; padding: 20px 5px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ccc; }
+        .item-btn:active { background: var(--gold); color: black; }
+        #tempText { background: rgba(212, 175, 55, 0.05); padding: 15px; border-radius: 12px; margin: 15px 0; color: var(--gold); text-align: center; font-weight: bold; border: 1px dashed #444; min-height: 54px; }
+        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; background: var(--gold); color: black; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
 
         /* الكروت */
-        .order-card { background: var(--card); color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); }
-        .items-display { font-size: 24px; font-weight: 900; color: #000; margin: 10px 0; }
-        .btn-done { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 10px; font-weight: bold; }
+        .order-card { background: var(--card); color: black; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 10px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } }
+        .items-display { font-size: 24px; font-weight: 900; color: #000; margin: 10px 0; line-height: 1.2; }
+        .btn-done { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div id="audio-overlay">
-    <h2 style="color: var(--gold)">مرحباً بك في الجوهرة 💎</h2>
-    <p>يرجى الضغط لتفعيل أصوات التنبيهات</p>
-    <button onclick="startApp()">تفعيل ودخول 🚀</button>
-</div>
-
-<header>نظام الجوهرة POS</header>
+<header>نظام الجوهرة POS 💎</header>
 
 <div class="nav-bar">
     <button id="n-cashier" class="nav-item active" onclick="showV('cashier')">🛒 الكاشير</button>
@@ -61,17 +54,17 @@
     <div id="cashier" class="view active">
         <input type="number" id="tabNum" placeholder="رقم الطاولة" inputmode="numeric">
         <div class="pos-grid">
-            <div class="item-btn" onclick="add('وجبة ستربس')">🍗 ستربس</div>
-            <div class="item-btn" onclick="add('وجبة برجر')">🍔 برجر</div>
+            <div class="item-btn" onclick="add('ستربس')">🍗 ستربس</div>
+            <div class="item-btn" onclick="add('برجر')">🍔 برجر</div>
             <div class="item-btn" onclick="add('كنتاكي')">🍗 كنتاكي</div>
-            <div class="item-btn" onclick="add('صاج دجاج')">🌯 صاج</div>
+            <div class="item-btn" onclick="add('صاج')">🌯 صاج</div>
             <div class="item-btn" onclick="add('بيتزا')">🍕 بيتزا</div>
             <div class="item-btn" onclick="add('فنجر')">🍟 فنجر</div>
             <div class="item-btn" onclick="add('بيبسي')">🥤 بيبسي</div>
             <div class="item-btn" onclick="add('ماء')">💧 ماء</div>
-            <div class="item-btn" style="color:red" onclick="resetPOS()">❌ مسح</div>
+            <div class="item-btn" style="color:var(--red)" onclick="resetPOS()">❌ مسح</div>
         </div>
-        <div id="tempText">بانتظار الطلبات...</div>
+        <div id="tempText">أختر الطلبات...</div>
         <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
     </div>
 
@@ -80,23 +73,21 @@
 </div>
 
 <script>
+    // أصوات خفيفة جداً
     const sndIn = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
     const sndReady = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
 
-    function startApp() {
-        sndIn.play().catch(()=>{}); // تفعيل الصوت
-        document.getElementById('audio-overlay').style.display = 'none';
-    }
-
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-final-fixed');
+    const channel = ably.channels.get('jawhara-v10-clean');
     
     let orderID = 1, currentOrder = [], readyCount = 0;
 
     function add(item) {
         currentOrder.push(item);
         document.getElementById('tempText').innerText = currentOrder.join(' + ');
+        // حركة ذكية: نشغل الصوت صامت حتى يفتح المتصفح الصلاحية
+        sndIn.play().then(() => sndIn.pause());
     }
 
     function sendOrder() {
@@ -110,14 +101,12 @@
     channel.subscribe((msg) => {
         if(msg.name === 'order') {
             render(msg.data, 'k');
-            // تنبيه صوتي للمطبخ
-            if(document.getElementById('kitchen').classList.contains('active')) sndIn.play();
+            if(document.getElementById('kitchen').classList.contains('active')) sndIn.play().catch(()=>{});
         } else if(msg.name === 'ready') {
             render(msg.data, 'r');
             readyCount++;
             updateBadge();
-            // تنبيه صوتي للكاشير
-            if(document.getElementById('cashier').classList.contains('active')) sndReady.play();
+            if(document.getElementById('cashier').classList.contains('active')) sndReady.play().catch(()=>{});
         }
     });
 
@@ -126,8 +115,9 @@
         const card = document.createElement('div');
         card.className = 'order-card';
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px;">
-                <b>#${data.id}</b> <b>طاولة ${data.table}</b>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:5px;">
+                <span style="background:black; color:var(--gold); padding:2px 8px; border-radius:5px; font-weight:bold;">#${data.id}</span>
+                <span style="font-weight:bold; font-size:18px;">طاولة ${data.table}</span>
             </div>
             <div class="items-display">${data.items}</div>
             ${target === 'k' 
@@ -161,9 +151,9 @@
 
     function resetPOS() {
         currentOrder = [];
-        document.getElementById('tempText').innerText = "تم الإرسال بنجاح ✅";
+        document.getElementById('tempText').innerText = "تم الإرسال ✅";
         document.getElementById('tabNum').value = '';
-        setTimeout(() => { document.getElementById('tempText').innerText = "بانتظار الطلبات..."; }, 2000);
+        setTimeout(() => { document.getElementById('tempText').innerText = "أختر الطلبات..."; }, 1500);
     }
 
     function showV(v) {
@@ -171,6 +161,10 @@
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById(v).classList.add('active');
         document.getElementById('n-' + v).classList.add('active');
+        // تصفير العداد إذا دخلنا لصفحة الجاهز
+        if(v === 'ready') {
+            // readyCount = 0; updateBadge(); // اختياري إذا تريد يصفر بمجرد الدخول
+        }
     }
 </script>
 </body>
