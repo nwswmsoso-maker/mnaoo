@@ -8,192 +8,140 @@
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
         :root { 
-            --gold: #ffbf00; 
-            --pink: #ff69b4; 
+            --gold: #ffbf00; --pink: #ff69b4; 
             --neon-pink-glow: 0 0 10px #ff69b4, 0 0 20px #ff69b4;
             --neon-gold-glow: 0 0 10px #ffbf00, 0 0 20px #ffbf00;
-            --bg: #0a0a0a; 
-            --card-bg: #161616; 
-            --green: #2ecc71; 
-            --red: #e74c3c; 
-            --text: #fdfdfd; 
+            --bg: #0a0a0a; --card-bg: #161616; --green: #2ecc71; --red: #e74c3c; 
         }
-        
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: #fdfdfd; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* شاشات البداية والرسائل النيون */
-        #role-selector { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; backdrop-filter: blur(10px); }
-        #role-selector h1 { font-size: 32px; font-weight: 800; color: var(--gold); text-shadow: var(--neon-gold-glow); margin-bottom: 0; }
-        .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 26px; font-weight: bold; cursor: pointer; transition: 0.3s; text-shadow: var(--neon-pink-glow); box-shadow: var(--neon-pink-glow), inset 0 0 10px rgba(255,105,180,0.2); }
-        .role-btn:active { background: var(--pink); color: #000; box-shadow: 0 0 30px #ff69b4; text-shadow: none; }
+        /* شاشة الاختيار */
+        #role-selector { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; backdrop-filter: blur(10px); }
+        #role-selector h1 { font-size: 35px; color: var(--gold); text-shadow: var(--neon-gold-glow); margin: 0; }
+        .role-btn { width: 85%; padding: 30px; border-radius: 25px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; text-shadow: var(--neon-pink-glow); box-shadow: var(--neon-pink-glow); cursor: pointer; }
 
-        #alert-msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: black; padding: 10px 30px; border-radius: 50px; font-weight: bold; z-index: 5000; display: none; box-shadow: 0 0 20px var(--green); animation: slideDown 0.3s; }
-        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
-
-        /* الهيدر والنو بار */
         header { padding: 18px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); box-shadow: var(--neon-gold-glow); }
-        header span { font-weight: 800; font-size: 20px; color: var(--gold); text-shadow: var(--neon-gold-glow); }
+        header span { font-weight: 800; font-size: 22px; color: var(--gold); text-shadow: var(--neon-gold-glow); }
         
         .nav-bar { display: none; background: #000; border-bottom: 1px solid #222; }
-        .nav-item { flex: 1; padding: 18px; border: none; background: transparent; color: #888; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; }
+        .nav-item { flex: 1; padding: 18px; border: none; background: transparent; color: #888; font-weight: bold; }
         .nav-item.active { color: var(--pink); border-bottom: 3px solid var(--pink); text-shadow: var(--neon-pink-glow); }
 
-        /* الكاشير - شريط التنبيه النيون */
-        #cashier-alert { height: 6px; background: var(--pink); display: none; animation: blinkNeon 1s infinite; box-shadow: var(--neon-pink-glow); }
-        @keyframes blinkNeon { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.5; filter: brightness(1.5); } }
-
-        /* الحاوية الرئيسية */
-        .container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 100%); }
-        .view { display: none; flex: 1; flex-direction: column; gap: 15px; }
+        .container { flex: 1; padding: 15px; overflow-y: auto; background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 100%); }
+        .view { display: none; flex-direction: column; gap: 15px; }
         .view.active { display: flex; }
 
-        /* الكاشير - العناوين النيون */
-        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; text-shadow: var(--neon-gold-glow); margin: 15px 0 5px 0; border-right: 3px solid var(--gold); padding-right: 10px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        /* قسم المنيو */
+        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; text-shadow: var(--neon-gold-glow); margin: 15px 0 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         
-        /* كارت الأكلة الوردي النيون */
-        .menu-item-card { background: var(--card-bg); border-radius: 18px; overflow: hidden; border: 1px solid #333; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .menu-item-card:active { transform: scale(0.96); border-color: var(--pink); box-shadow: var(--neon-pink-glow); }
-        .item-img { width: 100%; height: 110px; background-size: cover; background-position: center; border-bottom: 1px solid #333; }
-        .item-details { padding: 12px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 4px;}
-        .item-name { display: block; font-weight: 600; font-size: 15px; color: #fff; line-height: 1.3; }
+        /* كارت الوجبة مع معالجة الصورة */
+        .menu-item-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; border: 1px solid #333; transition: 0.3s; position: relative; }
+        .menu-item-card:active { transform: scale(0.95); box-shadow: var(--neon-pink-glow); border-color: var(--pink); }
+        
+        .img-container { width: 100%; height: 120px; background: #222; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-placeholder { position: absolute; font-size: 40px; z-index: 1; }
+
+        .item-details { padding: 12px; text-align: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .item-name { display: block; font-weight: 700; font-size: 14px; margin-bottom: 5px; color: #fff; }
         .item-price { display: block; font-size: 13px; color: var(--gold); font-weight: 800; text-shadow: var(--neon-gold-glow); }
 
-        /* الكاشير - الفاتورة والطلبات الجاهزة */
-        .cashier-forms { display: flex; flex-direction: column; gap: 15px; }
-        input#tabNum { width: 100%; background: #000; border: 2px solid var(--pink); color: var(--pink); padding: 18px; border-radius: 15px; text-align: center; font-size: 26px; font-weight: 800; text-shadow: var(--neon-pink-glow); box-shadow: var(--neon-pink-glow), inset 0 0 10px rgba(255,105,180,0.2); }
-        input#tabNum::placeholder { color: rgba(255,105,180,0.5); text-shadow: none; font-weight: 400; font-size: 18px; }
-        
-        #orderSummary { background: var(--card-bg); border-radius: 15px; padding: 18px; border: 1px dashed var(--gold); box-shadow: inset 0 0 10px rgba(255,191,0,0.1); }
-        #items-list { font-size: 15px; color: #ccc; margin-bottom: 12px; text-align: center; line-height: 1.5;}
+        /* الفاتورة ورقم الطاولة */
+        input#tabNum { width: 100%; background: #000; border: 2px solid var(--pink); color: var(--pink); padding: 18px; border-radius: 15px; text-align: center; font-size: 26px; font-weight: 800; text-shadow: var(--neon-pink-glow); margin-bottom: 15px; }
+        #orderSummary { background: var(--card-bg); border-radius: 15px; padding: 18px; border: 1px dashed var(--gold); margin-bottom: 15px; }
         #total-price { font-size: 24px; color: var(--green); font-weight: 800; text-align: center; text-shadow: 0 0 10px var(--green); }
-        
-        .btn-send { width: 100%; padding: 20px; border-radius: 18px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); color: black; cursor: pointer; transition: 0.2s; box-shadow: var(--neon-gold-glow); }
-        .btn-send:active { transform: scale(0.98); background: #e6ac00; box-shadow: 0 0 30px var(--gold); }
+        .btn-send { width: 100%; padding: 20px; border-radius: 20px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); box-shadow: var(--neon-gold-glow); cursor: pointer; }
 
-        /* الكاشير - خانة الجاهز النيون */
-        #ready-pane { background: rgba(46, 204, 113, 0.08); border-radius: 15px; padding: 18px; border: 1px solid rgba(46, 204, 113, 0.3); display: none; box-shadow: inset 0 0 15px rgba(46,204,113,0.1); }
-        .ready-title { color: var(--green); font-size: 15px; font-weight: 700; margin-bottom: 12px; text-align: center; text-shadow: 0 0 10px var(--green); }
-        .ready-list { display: flex; flex-direction: column; gap: 10px; }
-        .ready-item { background: #000; padding: 12px; border-radius: 12px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 10px rgba(46,204,113,0.2); }
-        .ready-table { font-weight: 800; font-size: 16px; color: #fff; text-shadow: 0 0 5px #fff; }
-        .btn-deliver { background: var(--green); color: black; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-deliver:active { background: #27ae60; transform: scale(0.95); }
+        /* خانة الجاهز */
+        #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 15px; padding: 15px; border: 1px solid var(--green); margin-bottom: 15px; display: none; }
+        .ready-item { background: #000; padding: 12px; border-radius: 12px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 
-        /* كروت المطبخ النيون - چبيرة وواضحة */
-        #k-list { display: flex; flex-direction: column; gap: 18px; }
-        .order-card { background: var(--card-bg); color: #fff; border-radius: 20px; padding: 25px; border: 2px solid var(--pink); box-shadow: var(--neon-pink-glow), 0 10px 40px rgba(0,0,0,0.8); animation: slideIn 0.3s; }
-        @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } }
-        .card-header { font-weight: 800; font-size: 26px; border-bottom: 2px solid #333; padding-bottom: 12px; color: #fff; text-shadow: 0 0 10px #fff; }
-        .card-items { font-size: 36px; font-weight: 900; margin: 20px 0; color: #fff; line-height: 1.2; }
-        .card-footer { display: flex; justify-content: space-between; font-size: 16px; color: #aaa; border-top: 1px solid #333; padding-top: 12px; margin-bottom: 20px; }
-        
-        /* زر تم التجهيز الچبير الأخضر النيون */
-        .btn-done { width: 100%; padding: 25px; background: var(--green); color: black; border: none; border-radius: 15px; font-weight: 900; font-size: 26px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 0 20px var(--green); text-transform: uppercase; letter-spacing: 1px; }
-        .btn-done:active { transform: scale(0.97); background: #27ae60; box-shadow: 0 0 40px var(--green); }
+        /* المطبخ */
+        .order-card { background: var(--card-bg); border-radius: 25px; padding: 25px; border: 2px solid var(--pink); box-shadow: var(--neon-pink-glow); margin-bottom: 20px; }
+        .card-items { font-size: 35px; font-weight: 900; margin: 20px 0; color: #fff; line-height: 1.1; }
+        .btn-done { width: 100%; padding: 25px; background: var(--green); border: none; border-radius: 20px; font-weight: 900; font-size: 28px; box-shadow: 0 0 20px var(--green); cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="role-selector">
-    <h1>الجوهرة POS Pro 💎</h1>
-    <p style="color:#aaa; font-size:16px;">يرجى اختيار واجهة العمل لبدء التشغيل</p>
-    <button class="role-btn" onclick="init('cashier')">🛒 واجهة الكاشير (الطلبات)</button>
-    <button class="role-btn" onclick="init('kitchen')">👨‍🍳 واجهة المطبخ (التجهيز)</button>
+    <h1>الجوهرة 💎 NEON</h1>
+    <button class="role-btn" onclick="init('cashier')">🛒 واجهة الكاشير</button>
+    <button class="role-btn" onclick="init('kitchen')">👨‍🍳 واجهة المطبخ</button>
 </div>
 
-<div id="alert-msg">تم إرسال الطلب 🚀</div>
+<header id="h-title"><span>الجوهرة POS Pro</span></header>
 
-<header id="h-title"><span>الجوهرة POS Pro Neon</span></header>
-<div id="cashier-alert"></div> <div id="nav" class="nav-bar">
+<div id="nav" class="nav-bar">
     <button id="n-cashier" class="nav-item active" onclick="go('cashier')">🛒 الطلبات</button>
     <button id="n-kitchen" class="nav-item" onclick="go('kitchen')">👨‍🍳 المطبخ</button>
 </div>
 
 <div class="container">
     <div id="cashier" class="view">
-        <div class="cashier-forms">
-            <input type="number" id="tabNum" placeholder="أدخل رقم الطاولة" inputmode="numeric">
-            
-            <div id="ready-pane">
-                <div class="ready-title">✅ طاولات جاهزة للتسليم (تأكيد):</div>
-                <div id="ready-list-cashier" class="ready-list"></div>
-            </div>
-
-            <div id="orderSummary">
-                <div id="items-list">أختر الوجبات من القائمة الموضحة أدناه...</div>
-                <div id="total-price">المجموع الكلي: 0 دينار</div>
-            </div>
-            <button class="btn-send" onclick="sendOrder()">إرسال الطلب للمطبخ 🚀</button>
-            <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); padding:8px; font-size:14px; width:100%; margin-top:5px; font-weight:600; cursor:pointer;">❌ مسح القائمة الحالية</button>
+        <input type="number" id="tabNum" placeholder="رقم الطاولة" inputmode="numeric">
+        
+        <div id="ready-pane">
+            <div style="color:var(--green); text-align:center; font-weight:bold;">✅ طلبات جاهزة للتسليم:</div>
+            <div id="ready-list-cashier"></div>
         </div>
 
-        <div class="menu-sections">
-            <div class="section-title">الوجبات العائلية</div>
-            <div class="menu-grid">
-                <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/103/conversions/item_1714407923_103-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">جامبو بلس 18 قطعة</span>
-                        <span class="item-price">40,000 د.ع</span>
-                    </div>
+        <div class="section-title">الأكثر مبيعاً 🍗</div>
+        <div class="menu-grid">
+            <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
+                <div class="img-container">
+                    <span class="img-placeholder">🍗</span>
+                    <img src="https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=80">
                 </div>
-                <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/102/conversions/item_1714407886_102-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">جامبو عائلي 15 قطعة</span>
-                        <span class="item-price">33,000 د.ع</span>
-                    </div>
-                </div>
-                <div class="menu-item-card" onclick="add('كودو دجاج 12', 30000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/101/conversions/item_1714407812_101-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">كودو دجاج 12 قطعة</span>
-                        <span class="item-price">30,000 د.ع</span>
-                    </div>
-                </div>
-                <div class="menu-item-card" onclick="add('وجبة القرمشة 3', 9000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/100/conversions/item_1714407768_100-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">وجبة القرمشة 3 قطع</span>
-                        <span class="item-price">9,000 د.ع</span>
-                    </div>
+                <div class="item-details">
+                    <span class="item-name">جامبو بلس 18</span>
+                    <span class="item-price">40,000 د.ع</span>
                 </div>
             </div>
-
-            <div class="section-title">البرجر الملكي</div>
-            <div class="menu-grid">
-                <div class="menu-item-card" onclick="add('برجر كلاسيك', 6000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/99/conversions/item_1714407705_99-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">برجر كلاسيك السبيشال</span>
-                        <span class="item-price">6,000 د.ع</span>
-                    </div>
+            <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
+                <div class="img-container">
+                    <span class="img-placeholder">🍟</span>
+                    <img src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&q=80">
                 </div>
-                <div class="menu-item-card" onclick="add('برجر دجاج', 5500)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/98/conversions/item_1714407672_98-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">برجر دجاج القرمشة</span>
-                        <span class="item-price">5,500 د.ع</span>
-                    </div>
-                </div>
-                <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/97/conversions/item_1714407592_97-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">دبل برجر ضخم</span>
-                        <span class="item-price">8,000 د.ع</span>
-                    </div>
-                </div>
-                <div class="menu-item-card" onclick="add('ستيك برجر', 8000)">
-                    <div class="item-img" style="background-image: url('https://kudo.iqmenus.com/storage/media/menu_items/96/conversions/item_1714407421_96-thumb.jpg')"></div>
-                    <div class="item-details">
-                        <span class="item-name">ستيك برجر اللذيذ</span>
-                        <span class="item-price">8,000 د.ع</span>
-                    </div>
+                <div class="item-details">
+                    <span class="item-name">جامبو عائلي 15</span>
+                    <span class="item-price">33,000 د.ع</span>
                 </div>
             </div>
         </div>
+
+        <div class="section-title">البرجر الملكي 🍔</div>
+        <div class="menu-grid">
+            <div class="menu-item-card" onclick="add('برجر كلاسيك', 6000)">
+                <div class="img-container">
+                    <span class="img-placeholder">🍔</span>
+                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80">
+                </div>
+                <div class="item-details">
+                    <span class="item-name">برجر كلاسيك</span>
+                    <span class="item-price">6,000 د.ع</span>
+                </div>
+            </div>
+            <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
+                <div class="img-container">
+                    <span class="img-placeholder">🍔</span>
+                    <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80">
+                </div>
+                <div class="item-details">
+                    <span class="item-name">دبل برجر ضخم</span>
+                    <span class="item-price">8,000 د.ع</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="orderSummary">
+            <div id="items-list" style="text-align:center; color:#aaa; margin-bottom:10px;">أختر الأكل...</div>
+            <div id="total-price">المجموع: 0 دينار</div>
+        </div>
+        <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
+        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin-top:10px; font-weight:bold;">❌ مسح</button>
     </div>
 
     <div id="kitchen" class="view">
@@ -205,26 +153,22 @@
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-pos-neon-v18');
+    const channel = ably.channels.get('jawhara-v19-neon');
     
-    let currentOrder = [], totalPrice = 0, role = '', orderCount = 1;
+    let currentOrder = [], totalPrice = 0, role = '';
 
     function init(r) {
         role = r;
         bell.play().then(() => { bell.pause(); bell.currentTime = 0; }).catch(()=>{});
         document.getElementById('role-selector').style.display = 'none';
         document.getElementById('nav').style.display = 'flex';
-        if(role === 'kitchen') { document.getElementById('n-cashier').style.display = 'none'; document.getElementById('h-title').innerHTML = "<span>المطبخ POS Neon 👨‍🍳</span>"; go('kitchen'); }
-        else { document.getElementById('n-kitchen').style.display = 'none'; document.getElementById('h-title').innerHTML = "<span>الكاشير POS Neon 🛒</span>"; go('cashier'); }
+        if(role === 'kitchen') { document.getElementById('n-cashier').style.display = 'none'; go('kitchen'); }
+        else { document.getElementById('n-kitchen').style.display = 'none'; go('cashier'); }
     }
 
     function add(name, price) {
         currentOrder.push(name);
         totalPrice += price;
-        updateUI();
-    }
-
-    function updateUI() {
         document.getElementById('items-list').innerText = currentOrder.join(' + ');
         document.getElementById('total-price').innerText = "المجموع: " + totalPrice.toLocaleString() + " دينار";
     }
@@ -232,68 +176,46 @@
     function sendOrder() {
         const t = document.getElementById('tabNum').value;
         if(!t || currentOrder.length === 0) return;
-        channel.publish('msg', { id: orderCount++, table: t, items: currentOrder.join(' - '), total: totalPrice.toLocaleString() });
+        channel.publish('msg', { table: t, items: currentOrder.join(' - '), total: totalPrice.toLocaleString() });
         bell.play().catch(()=>{});
-        showAlert("تم إرسال الطلب للمطبخ 🚀");
         clearOrder();
     }
 
     channel.subscribe((msg) => {
         const d = msg.data;
         if(d.type === 'ready' && role === 'cashier') {
-            addToReadyBoard(d.table);
+            document.getElementById('ready-pane').style.display = 'block';
+            const list = document.getElementById('ready-list-cashier');
+            const item = document.createElement('div');
+            item.className = 'ready-item';
+            item.innerHTML = `<span style="font-weight:bold;">طاولة ${d.table}</span><button onclick="this.parentElement.remove()" style="background:var(--green); border:none; padding:8px; border-radius:8px; font-weight:bold;">تأكيد التسليم</button>`;
+            list.appendChild(item);
             bell.play().catch(()=>{});
-            blinkCashierAlert();
         } else if(!d.type && role === 'kitchen') {
-            drawKitchenOrder(d);
+            drawKitchen(d);
             bell.play().catch(()=>{});
         }
     });
 
-    function drawKitchenOrder(d) {
+    function drawKitchen(d) {
         const list = document.getElementById('k-list');
         const card = document.createElement('div');
         card.className = 'order-card';
         card.innerHTML = `
-            <div class="card-header">طاولة ${d.table}</div>
+            <div style="font-size:24px; font-weight:800; border-bottom:1px solid #333; padding-bottom:10px;">طاولة ${d.table}</div>
             <div class="card-items">${d.items}</div>
-            <div class="card-footer">
-                <span>طلب #${d.id}</span>
-                <span style="color:var(--gold); font-weight:bold; text-shadow:var(--neon-gold-glow);">الحساب: ${d.total} د.ع</span>
-            </div>
-            <button class="btn-done" onclick="markOrderReady(this, '${d.table}')">
-                ✅ تم التجهيز الآن
-            </button>
+            <div style="color:var(--gold); font-weight:bold; margin-bottom:15px;">الحساب: ${d.total} د.ع</div>
+            <button class="btn-done" onclick="markReady(this, '${d.table}')">✅ تم التجهيز</button>
         `;
         list.prepend(card);
     }
 
-    function markOrderReady(btn, table) {
+    function markReady(btn, table) {
         channel.publish('msg', { type: 'ready', table: table });
         btn.parentElement.remove();
     }
 
-    function addToReadyBoard(table) {
-        document.getElementById('ready-pane').style.display = 'block';
-        const list = document.getElementById('ready-list-cashier');
-        const item = document.createElement('div');
-        item.className = 'ready-item';
-        item.innerHTML = `
-            <span class="ready-table">طاولة ${table}</span>
-            <button class="btn-deliver" onclick="confirmDelivery(this)">تأكيد التسليم 🤝</button>
-        `;
-        list.appendChild(item);
-    }
-
-    function confirmDelivery(btn) {
-        btn.parentElement.remove();
-        if(document.getElementById('ready-list-cashier').children.length === 0) document.getElementById('ready-pane').style.display = 'none';
-        showAlert("تم تسليم الطلب ✅");
-    }
-
-    function clearOrder() { currentOrder = []; totalPrice = 0; updateUI(); document.getElementById('tabNum').value = ''; }
-    function showAlert(txt) { const m = document.getElementById('alert-msg'); m.innerText = txt; m.style.display = 'block'; setTimeout(() => m.style.display = 'none', 1500); }
-    function blinkCashierAlert() { const a = document.getElementById('cashier-alert'); a.style.display = 'block'; setTimeout(() => a.style.display = 'none', 4000); }
+    function clearOrder() { currentOrder = []; totalPrice = 0; document.getElementById('items-list').innerText = "أختر الأكل..."; document.getElementById('total-price').innerText = "المجموع: 0 دينار"; document.getElementById('tabNum').value = ''; }
 
     function go(v) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
