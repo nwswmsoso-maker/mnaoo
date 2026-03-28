@@ -3,170 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS - نسخة التمرير الحر</title>
+    <title>الجوهرة POS - النظام المفتوح</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
         :root { --pink: #ff69b4; --gold: #ffbf00; --bg: #0d1117; --green: #00e676; --card: #1c2331; }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         
-        /* السماح بالتمرير الطبيعي للجسم */
-        body { margin: 0; background: var(--bg); color: #fff; min-height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+        /* جعل الصفحة قابلة للتمرير بالكامل وبسلاسة */
+        body { margin: 0; background: var(--bg); color: #fff; overflow-x: hidden; overflow-y: auto; padding-bottom: 120px; }
 
-        /* الهيدر ثابت فوق */
-        .header-top { position: sticky; top: 0; z-index: 1000; background: #000; border-bottom: 2px solid var(--gold); padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .v-box { color: var(--gold); font-size: 14px; }
-        .t-active-box { background: var(--pink); color: #000; padding: 4px 12px; border-radius: 8px; font-weight: 900; }
+        /* هيدر ثابت بسيط */
+        .main-header { position: sticky; top: 0; z-index: 1000; background: #000; border-bottom: 2px solid var(--gold); padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .m-title { color: var(--gold); font-size: 18px; font-weight: 900; }
+        .table-selected { background: var(--pink); color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 900; font-size: 14px; }
 
-        /* شريط الطاولات مرن */
-        .tables-scroll { position: sticky; top: 55px; z-index: 999; background: #000; display: flex; overflow-x: auto; gap: 8px; padding: 10px; border-bottom: 1px solid #333; }
-        .t-unit { flex: 0 0 45px; height: 45px; background: #222; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid #444; }
-        .t-unit.active { background: var(--pink); color: #000; box-shadow: 0 0 10px var(--pink); }
+        /* شريط الطاولات */
+        .tables-row { position: sticky; top: 58px; z-index: 999; background: #080b12; display: flex; overflow-x: auto; gap: 10px; padding: 10px; border-bottom: 1px solid #333; }
+        .t-item { flex: 0 0 50px; height: 50px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid #444; }
+        .t-item.active { background: var(--pink); color: #000; border-color: #fff; transform: scale(1.1); }
 
-        /* الحاوية الرئيسية بدون قيود ارتفاع */
-        .wrapper { display: flex; padding: 10px; gap: 10px; align-items: flex-start; }
+        /* المنيو بوضع الملء الكامل */
+        .full-menu { padding: 15px; width: 100%; }
+        .cat-head { color: var(--gold); font-size: 18px; font-weight: 900; margin: 25px 0 15px; display: block; border-right: 5px solid var(--gold); padding-right: 10px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-p { background: var(--card); border: 1px solid #333; border-radius: 15px; padding: 20px 10px; text-align: center; transition: 0.2s; }
+        .card-p:active { background: #2d3748; transform: scale(0.95); }
+        .card-p b { display: block; font-size: 15px; margin-bottom: 5px; }
+        .card-p i { color: var(--green); font-style: normal; font-size: 14px; font-weight: bold; }
 
-        /* المنيو يأخذ راحته بالطول */
-        .menu-side { flex: 2; display: flex; flex-direction: column; }
-        .cat-title { color: var(--gold); font-size: 16px; font-weight: 900; margin: 15px 0 10px; border-right: 4px solid var(--gold); padding-right: 10px; }
-        .grid-ui { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn-item { background: var(--card); border: 1px solid #333; border-radius: 12px; padding: 18px 5px; text-align: center; }
-        .btn-item b { display: block; font-size: 14px; margin-bottom: 4px; }
-        .btn-item i { color: var(--green); font-style: normal; font-size: 12px; font-weight: bold; }
-
-        /* السلة والجاهز */
-        .info-side { flex: 1; position: sticky; top: 125px; display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 230px); }
-        .basket-box { flex: 1.5; background: #05070a; border: 1px solid #222; border-radius: 10px; overflow-y: auto; padding: 8px; }
-        .ready-box { flex: 1; background: #000; border: 1px solid var(--green); border-radius: 10px; overflow-y: auto; padding: 8px; }
+        /* شريط الطلب السفلي الثابت */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; border-top: 2px solid #333; padding: 15px; display: flex; align-items: center; gap: 15px; z-index: 2000; }
+        .total-price { flex: 1; text-align: center; color: var(--green); font-size: 28px; font-weight: 900; }
+        .btn-send { flex: 2; background: var(--green); color: #000; border: none; border-radius: 15px; height: 65px; font-weight: 900; font-size: 22px; box-shadow: 0 5px 0 #007a3d; }
         
-        .line-item { background: #161b22; padding: 8px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 11px; border-left: 3px solid var(--pink); }
-        .ticket { background: #1c2331; border: 1px solid var(--green); border-radius: 8px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
-        .btn-del { background: var(--green); color: #000; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: 900; margin-top: 5px; }
-
-        /* زر الإرسال الطواف */
-        .floating-action { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #000; padding: 12px; border: 2px solid #333; border-radius: 20px; display: flex; align-items: center; gap: 15px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-        .total-price { flex: 1; color: var(--green); font-size: 26px; font-weight: 900; text-align: center; }
-        .btn-send-now { flex: 2; background: var(--green); color: #000; border: none; border-radius: 15px; height: 60px; font-weight: 900; font-size: 22px; box-shadow: 0 4px 0 #005a2e; }
-        .btn-send-now:active { transform: translateY(2px); box-shadow: none; }
+        /* قسم السلة (يفتح عند الحاجة) */
+        .basket-drawer { position: fixed; top: 120px; left: 10px; width: 40px; height: 40px; background: var(--pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1500; color: #000; font-weight: 900; box-shadow: 0 0 15px var(--pink); }
+        #order-preview { position: fixed; top: 170px; left: 10px; width: 140px; max-height: 200px; background: rgba(0,0,0,0.8); border: 1px solid #444; border-radius: 10px; overflow-y: auto; padding: 5px; font-size: 11px; z-index: 1500; display: none; }
     </style>
 </head>
 <body>
 
-<div id="entry-screen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
-    <h1 style="color:var(--gold); font-size:45px;">الجوهرة 💎</h1>
-    <button onclick="start('cashier')" style="width:85%; padding:25px; background:var(--pink); border-radius:20px; font-weight:900; font-size:24px; border:none;">كاشير 🛒</button>
-    <button onclick="start('kitchen')" style="width:85%; padding:25px; border-radius:20px; border:2px solid #444; color:#fff; background:none; font-size:22px;">مطبخ 👨‍🍳</button>
+<div id="entry" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+    <h1 style="color:var(--gold); font-size:50px;">الجوهرة 💎</h1>
+    <button onclick="go('cashier')" style="width:85%; padding:30px; background:var(--pink); border-radius:20px; font-weight:900; font-size:26px; border:none;">كاشير 🛒</button>
+    <button onclick="go('kitchen')" style="width:85%; padding:30px; border-radius:20px; border:2px solid #444; color:#fff; background:none; font-size:22px;">مطبخ 👨‍🍳</button>
 </div>
 
-<div id="pos-ui" style="display:none;">
-    <div class="header-top">
-        <div class="v-box">💰 مبيعات اليوم: <b id="v-val">0</b></div>
-        <div class="t-active-box">طاولة: <span id="t-disp">--</span></div>
+<div id="cashier-ui" style="display:none;">
+    <div class="main-header">
+        <div class="m-title">💎 مبيعات: <span id="v-total">0</span></div>
+        <div class="table-selected">طاولة: <span id="t-active">--</span></div>
     </div>
 
-    <div class="tables-scroll" id="t-list"></div>
+    <div class="tables-row" id="t-list"></div>
 
-    <div class="wrapper">
-        <div class="info-side">
-            <div class="basket-box" id="b-list"></div>
-            <div class="ready-box">
-                <div style="color:var(--green); font-size:12px; font-weight:900; margin-bottom:8px;">🔔 طلبات كملت:</div>
-                <div id="ready-ui"></div>
-            </div>
+    <div class="basket-drawer" onclick="toggleBasket()">🛒</div>
+    <div id="order-preview"></div>
+
+    <div class="full-menu">
+        <span class="cat-head">🍔 برگرات</span>
+        <div class="menu-grid">
+            <div class="card-p" onclick="add('برگر لحم', 4000)"><b>برگر لحم</b><i>4,000</i></div>
+            <div class="card-p" onclick="add('برگر دبل', 6000)"><b>برگر دبل</b><i>6,000</i></div>
+            <div class="card-p" onclick="add('كرسبي', 4500)"><b>كرسبي</b><i>4,500</i></div>
+            <div class="card-p" onclick="add('زنجر حار', 5000)"><b>زنجر حار</b><i>5,000</i></div>
+            <div class="card-p" onclick="add('تشيز برگر', 5500)"><b>تشيز برگر</b><i>5,500</i></div>
         </div>
 
-        <div class="menu-side">
-            <div class="cat-title">🍔 برگرات</div>
-            <div class="grid-ui">
-                <div class="btn-item" onclick="add('برگر لحم', 4000)"><b>برگر لحم</b><i>4,000</i></div>
-                <div class="btn-item" onclick="add('برگر دبل', 6000)"><b>برگر دبل</b><i>6,000</i></div>
-                <div class="btn-item" onclick="add('كرسبي', 4500)"><b>كرسبي</b><i>4,500</i></div>
-                <div class="btn-item" onclick="add('زنجر حار', 5000)"><b>زنجر حار</b><i>5,000</i></div>
-                <div class="btn-item" onclick="add('تشيز برگر', 5500)"><b>تشيز برگر</b><i>5,500</i></div>
-            </div>
+        <span class="cat-head">🍟 مقبلات</span>
+        <div class="menu-grid">
+            <div class="card-p" onclick="add('بطاطا عادي', 2000)"><b>بطاطا</b><i>2,000</i></div>
+            <div class="card-p" onclick="add('بطاطا لارج', 3000)"><b>بطاطا لارج</b><i>3,000</i></div>
+            <div class="card-p" onclick="add('بطاطا جبن', 3500)"><b>بطاطا جبن</b><i>3,500</i></div>
+            <div class="card-p" onclick="add('حلقات بصل', 2500)"><b>بصل</b><i>2,500</i></div>
+            <div class="card-p" onclick="add('ناجت 6ق', 4000)"><b>ناجت</b><i>4,000</i></div>
+        </div>
 
-            <div class="cat-title">🍟 مقبلات</div>
-            <div class="grid-ui">
-                <div class="btn-item" onclick="add('بطاطا عادي', 2000)"><b>بطاطا</b><i>2,000</i></div>
-                <div class="btn-item" onclick="add('بطاطا لارج', 3000)"><b>بطاطا لارج</b><i>3,000</i></div>
-                <div class="btn-item" onclick="add('بطاطا جبن', 3500)"><b>بطاطا جبن</b><i>3,500</i></div>
-                <div class="btn-item" onclick="add('حلقات بصل', 2500)"><b>بصل</b><i>2,500</i></div>
-                <div class="btn-item" onclick="add('ناجت 6ق', 4000)"><b>ناجت</b><i>4,000</i></div>
-            </div>
+        <span class="cat-head">🌯 ساندويشات</span>
+        <div class="menu-grid">
+            <div class="card-p" onclick="add('فلافل', 1500)"><b>فلافل</b><i>1,500</i></div>
+            <div class="card-p" onclick="add('شورما دجاج', 3500)"><b>شورما دجاج</b><i>3,500</i></div>
+            <div class="card-p" onclick="add('شورما لحم', 4500)"><b>شورما لحم</b><i>4,500</i></div>
+            <div class="card-p" onclick="add('كص دجاج', 3000)"><b>كص دجاج</b><i>3,000</i></div>
+        </div>
 
-            <div class="cat-title">🌯 ساندويشات</div>
-            <div class="grid-ui">
-                <div class="btn-item" onclick="add('فلافل', 1500)"><b>فلافل</b><i>1,500</i></div>
-                <div class="btn-item" onclick="add('شورما دجاج', 3500)"><b>شورما دجاج</b><i>3,500</i></div>
-                <div class="btn-item" onclick="add('شورما لحم', 4500)"><b>شورما لحم</b><i>4,500</i></div>
-                <div class="btn-item" onclick="add('كص دجاج', 3000)"><b>كص دجاج</b><i>3,000</i></div>
-            </div>
+        <span class="cat-head">🥤 مشروبات</span>
+        <div class="menu-grid">
+            <div class="card-p" onclick="add('قوطية', 1000)"><b>قوطية</b><i>1,000</i></div>
+            <div class="card-p" onclick="add('عصير معلب', 1500)"><b>عصير</b><i>1,500</i></div>
+            <div class="card-p" onclick="add('ماء', 500)"><b>ماء</b><i>500</i></div>
+            <div class="card-p" onclick="add('فريش', 2500)"><b>فريش</b><i>2,500</i></div>
+        </div>
 
-            <div class="cat-title">🥤 مشروبات</div>
-            <div class="grid-ui">
-                <div class="btn-item" onclick="add('قوطية', 1000)"><b>قوطية</b><i>1,000</i></div>
-                <div class="btn-item" onclick="add('عصير معلب', 1500)"><b>عصير</b><i>1,500</i></div>
-                <div class="btn-item" onclick="add('ماء', 500)"><b>ماء</b><i>500</i></div>
-                <div class="btn-item" onclick="add('فريش', 2500)"><b>فريش</b><i>2,500</i></div>
-            </div>
-
-            <div class="cat-title">🔥 وجبات كومبو</div>
-            <div class="grid-ui">
-                <div class="btn-item" onclick="add('كومبو برگر', 6500)"><b>كومبو برگر</b><i>6,500</i></div>
-                <div class="btn-item" onclick="add('كومبو زنجر', 7500)"><b>كومبو زنجر</b><i>7,500</i></div>
-                <div class="btn-item" onclick="add('كومبو شورما', 6000)"><b>كومبو شورما</b><i>6,000</i></div>
-            </div>
+        <span class="cat-head">🔥 وجبات كومبو</span>
+        <div class="menu-grid">
+            <div class="card-p" onclick="add('كومبو برگر', 6500)"><b>كومبو برگر</b><i>6,500</i></div>
+            <div class="card-p" onclick="add('كومبو زنجر', 7500)"><b>كومبو زنجر</b><i>7,500</i></div>
+            <div class="card-p" onclick="add('كومبو شورما', 6000)"><b>كومبو شورما</b><i>6,000</i></div>
+            <div class="card-p" onclick="add('وجبة عائلية', 15000)"><b>وجبة عائلية</b><i>15,000</i></div>
         </div>
     </div>
 
-    <div class="floating-action">
-        <div class="total-price"><span id="sum-disp">0</span> <small style="font-size:12px">د.ع</small></div>
-        <button class="btn-send-now" onclick="sendToK()">إرسال للمطبخ 🚀</button>
+    <div class="bottom-bar">
+        <div class="total-price"><span id="sum">0</span></div>
+        <button class="btn-send" onclick="send()">إرسال للمطبخ 🚀</button>
     </div>
 </div>
 
-<div id="kitchen-ui" style="display:none; padding:20px; min-height:100vh;">
-    <h2 style="text-align:center; color:var(--pink)">👨‍🍳 طلبات المطبخ</h2>
+<div id="kitchen-ui" style="display:none; padding:20px;">
+    <h2 style="text-align:center; color:var(--pink)">👨‍🍳 المطبخ</h2>
     <div id="k-list"></div>
 </div>
 
 <script>
     const ably = new Ably.Realtime('Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU');
-    const chan = ably.channels.get('jawhara-unlocked-v1');
+    const chan = ably.channels.get('jawhara-full-scroll-v1');
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
     let basket = [], total = 0, table = "";
 
-    function start(r) {
-        document.getElementById('entry-screen').style.display = 'none';
+    function go(r) {
+        document.getElementById('entry').style.display = 'none';
         if(r === 'cashier') {
-            document.getElementById('pos-ui').style.display = 'block';
+            document.getElementById('cashier-ui').style.display = 'block';
             updateVault();
             for(let i=1; i<=30; i++) {
-                const b = document.createElement('div'); b.className = 't-unit'; b.innerText = i;
-                b.onclick = () => { document.querySelectorAll('.t-unit').forEach(x=>x.classList.remove('active')); b.classList.add('active'); table = i; document.getElementById('t-disp').innerText = i; };
+                const b = document.createElement('div'); b.className = 't-item'; b.innerText = i;
+                b.onclick = () => { document.querySelectorAll('.t-item').forEach(x=>x.classList.remove('active')); b.classList.add('active'); table = i; document.getElementById('t-active').innerText = i; };
                 document.getElementById('t-list').appendChild(b);
             }
-            renderReady();
         } else { document.getElementById('kitchen-ui').style.display = 'block'; renderKitchen(); }
     }
 
     function add(n, p) {
         basket.push({n, p}); total += p;
-        document.getElementById('sum-disp').innerText = total.toLocaleString();
-        const d = document.createElement('div'); d.className = 'line-item';
-        d.innerHTML = `<span>${n}</span><b>${p.toLocaleString()}</b>`;
-        document.getElementById('b-list').prepend(d);
+        document.getElementById('sum').innerText = total.toLocaleString();
+        const d = document.createElement('div'); d.style.borderBottom="1px solid #333"; d.innerText = n;
+        document.getElementById('order-preview').prepend(d);
+        document.getElementById('order-preview').style.display = 'block';
     }
 
-    function sendToK() {
-        if(!table || basket.length === 0) { alert("اختر الطاولة والطلب!"); return; }
+    function toggleBasket() {
+        const p = document.getElementById('order-preview');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function send() {
+        if(!table || basket.length === 0) { alert("اختر الطاولة والوجبة!"); return; }
         chan.publish('k', { t: table, i: basket.map(x=>x.n).join(' + '), s: total });
         basket = []; total = 0; table = "";
-        document.getElementById('sum-disp').innerText = "0";
-        document.getElementById('b-list').innerHTML = "";
-        document.getElementById('t-disp').innerText = "--";
-        document.querySelectorAll('.t-unit').forEach(x=>x.classList.remove('active'));
+        document.getElementById('sum').innerText = "0";
+        document.getElementById('order-preview').innerHTML = "";
+        document.getElementById('order-preview').style.display = 'none';
+        document.getElementById('t-active').innerText = "--";
+        document.querySelectorAll('.t-item').forEach(x=>x.classList.remove('active'));
     }
 
     chan.subscribe('k', m => {
@@ -175,51 +166,28 @@
         bell.play(); if(document.getElementById('kitchen-ui').style.display === 'block') renderKitchen();
     });
 
-    chan.subscribe('c', m => {
-        let d = JSON.parse(localStorage.getItem('r_st') || '[]');
-        d.push(m.data); localStorage.setItem('r_st', JSON.stringify(d));
-        bell.play(); if(document.getElementById('pos-ui').style.display === 'block') renderReady();
-    });
-
     function renderKitchen() {
         const div = document.getElementById('k-list'); div.innerHTML = "";
         let d = JSON.parse(localStorage.getItem('k_st') || '[]');
         d.forEach((o, i) => {
             const c = document.createElement('div'); c.style = "background:var(--card); border:2px solid var(--pink); border-radius:15px; padding:20px; margin-bottom:15px;";
-            c.innerHTML = `<div style="color:var(--gold)">طاولة ${o.t}</div><div style="font-size:24px; margin:15px 0;">${o.i}</div><button onclick="finK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:12px; font-weight:bold;">جهز الطلب ✅</button>`;
+            c.innerHTML = `<div style="color:var(--gold)">طاولة ${o.t}</div><div style="font-size:24px; margin:15px 0;">${o.i}</div><button onclick="finK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:12px; font-weight:bold;">جهز ✅</button>`;
             div.prepend(c);
         });
     }
 
     function finK(i) {
         let d = JSON.parse(localStorage.getItem('k_st') || '[]');
-        const comp = d.splice(i, 1)[0];
-        localStorage.setItem('k_st', JSON.stringify(d));
-        chan.publish('c', comp); renderKitchen();
-    }
-
-    function renderReady() {
-        const div = document.getElementById('ready-ui'); div.innerHTML = "";
-        let d = JSON.parse(localStorage.getItem('r_st') || '[]');
-        d.forEach((o, i) => {
-            const c = document.createElement('div'); c.className = 'ticket';
-            c.innerHTML = `<div style="color:var(--pink)">طاولة ${o.t}</div><div>${o.i}</div><button class="btn-del" onclick="deliv(${i})">تسليم</button>`;
-            div.prepend(c);
-        });
-    }
-
-    function deliv(i) {
-        let d = JSON.parse(localStorage.getItem('r_st') || '[]');
         const ord = d.splice(i, 1)[0];
-        localStorage.setItem('r_st', JSON.stringify(d));
+        localStorage.setItem('k_st', JSON.stringify(d));
         let s = parseInt(localStorage.getItem('v_st') || '0'); s += ord.s;
         localStorage.setItem('v_st', s.toString());
-        updateVault(); renderReady();
+        renderKitchen();
     }
 
     function updateVault() {
         const s = parseInt(localStorage.getItem('v_st') || '0');
-        document.getElementById('v-val').innerText = s.toLocaleString();
+        document.getElementById('v-total').innerText = s.toLocaleString();
     }
 </script>
 </body>
