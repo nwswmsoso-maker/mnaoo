@@ -20,7 +20,6 @@
         .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; cursor: pointer; }
 
         header { padding: 12px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); }
-        header span { font-weight: 800; font-size: 18px; color: var(--gold); }
         
         .nav-bar { display: none; background: #000; border-bottom: 1px solid #222; }
         .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #666; font-weight: bold; font-size: 16px; }
@@ -30,30 +29,27 @@
         .view { display: none; flex-direction: column; gap: 10px; width: 100%; }
         .view.active { display: flex; }
 
-        /* خانة التسليم */
         #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 15px; padding: 12px; border: 2px solid var(--green); display: none; margin-bottom: 10px; }
         .ready-item { background: #000; padding: 10px; border-radius: 10px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 
-        /* الكيبورد الأفقي */
         .keypad-container { background: var(--card-bg); padding: 10px; border-radius: 15px; border: 1px solid var(--pink); margin-bottom: 10px; }
-        .keypad-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-        .key-btn { flex: 0 0 55px; height: 55px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; transition: 0.1s; }
-        .key-btn:active { transform: scale(0.9); background: #222; }
+        .keypad-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; }
+        .key-btn { flex: 0 0 55px; height: 55px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
         .key-btn.selected { background: var(--pink); color: #000; border-color: #fff; }
 
-        /* المنيو */
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.1s; }
-        .menu-item-card:active { transform: scale(0.95); border-color: var(--pink); }
-        .img-box { width: 100%; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 40px; background: #111; }
-        .item-details { padding: 8px; text-align: center; }
-        .item-name { font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px; }
-        .item-price { font-size: 12px; color: var(--gold); font-weight: 800; display: block; }
+        /* منطقة الكتابة والمدخلات */
+        .input-section { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 10px; font-size: 18px; text-align: center; width: 100%; font-weight: bold; }
+        input:focus { border-color: var(--pink); outline: none; }
+
+        .quick-keyboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; }
+        .q-btn { background: #222; border: 1px solid #333; color: #ccc; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+        .q-btn:active { background: var(--pink); color: #000; }
+
+        .add-to-list { background: var(--green); color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: 800; font-size: 18px; margin-top: 5px; }
 
         .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); margin-top: 15px; box-shadow: 0 0 15px var(--gold); }
-        .btn-send:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* المطبخ */
         .order-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 2px solid var(--pink); margin-bottom: 15px; width: 100%; }
         .card-items { font-size: 30px; font-weight: 900; margin: 15px 0; color: #fff; line-height: 1.4; }
         .btn-done { width: 100%; padding: 20px; background: var(--green); border: none; border-radius: 15px; font-weight: 800; font-size: 24px; color: #000; }
@@ -83,7 +79,6 @@
         </div>
 
         <div id="ready-pane">
-            <div style="color:var(--green); text-align:center; font-weight:bold; font-size:14px;">✅ طلبات جاهزة (اضغط تأكيد):</div>
             <div id="ready-list-cashier"></div>
         </div>
 
@@ -91,46 +86,25 @@
             <div class="keypad-scroll" id="keypad"></div>
         </div>
 
-        <div class="menu-grid">
-            <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
-                <div class="img-box">🍗</div>
-                <div class="item-details"><span class="item-name">جامبو بلس 18</span><span class="item-price">40,000 د.ع</span></div>
+        <div class="input-section">
+            <input type="text" id="food-name" placeholder="أكتب اسم الوجبة هنا...">
+            <div class="quick-keyboard">
+                <button class="q-btn" onclick="quickAdd('برجر')">برجر</button>
+                <button class="q-btn" onclick="quickAdd('قص')">قص</button>
+                <button class="q-btn" onclick="quickAdd('وجبة')">وجبة</button>
+                <button class="q-btn" onclick="quickAdd('بيتزا')">بيتزا</button>
+                <button class="q-btn" onclick="quickAdd('لفه')">لفه</button>
+                <button class="q-btn" onclick="quickAdd('ببسي')">ببسي</button>
             </div>
-            <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
-                <div class="img-box">🍟</div>
-                <div class="item-details"><span class="item-name">جامبو عائلي 15</span><span class="item-price">33,000 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('كودو دجاج 12', 30000)">
-                <div class="img-box">🥪</div>
-                <div class="item-details"><span class="item-name">كودو دجاج 12</span><span class="item-price">30,000 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('وجبة القرمشة 3', 9000)">
-                <div class="img-box">🍗</div>
-                <div class="item-details"><span class="item-name">وجبة القرمشة 3</span><span class="item-price">9,000 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('برجر كلاسيك', 6000)">
-                <div class="img-box">🍔</div>
-                <div class="item-details"><span class="item-name">برجر كلاسيك</span><span class="item-price">6,000 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('برجر دجاج', 5500)">
-                <div class="img-box">🍔</div>
-                <div class="item-details"><span class="item-name">برجر دجاج</span><span class="item-price">5,500 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
-                <div class="img-box">🍔</div>
-                <div class="item-details"><span class="item-name">دبل برجر</span><span class="item-price">8,000 د.ع</span></div>
-            </div>
-            <div class="menu-item-card" onclick="add('ستيك برجر', 8000)">
-                <div class="img-box">🥩</div>
-                <div class="item-details"><span class="item-name">ستيك برجر</span><span class="item-price">8,000 د.ع</span></div>
-            </div>
+            <input type="number" id="food-price" placeholder="السعر (مثلاً: 5000)">
+            <button class="add-to-list" onclick="manualAdd()">إضافة للطلب +</button>
         </div>
 
-        <div id="orderSummary" style="background:var(--card-bg); padding:10px; margin-top:10px; border-radius:10px; text-align:center; color:#777;">
-            <div id="items-list">أختر الوجبات...</div>
+        <div id="orderSummary" style="background:#111; padding:10px; margin-top:10px; border-radius:10px; text-align:center;">
+            <div id="items-list" style="color:#888;">سجل الطلبات فارغ...</div>
         </div>
         <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
-        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin:10px 0; font-weight:bold; cursor:pointer;">❌ مسح</button>
+        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin-top:10px; font-weight:bold;">❌ مسح</button>
     </div>
 
     <div id="kitchen" class="view">
@@ -139,7 +113,6 @@
 </div>
 
 <script>
-    // نظام الصوت
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTapSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -155,12 +128,11 @@
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v60');
+    const channel = ably.channels.get('jawhara-v70');
 
     let currentOrder = [], totalPrice = 0, role = '', selectedTable = '';
     let kitchenOrders = [], readyOrders = [];
 
-    // نظام الحفظ التلقائي
     function saveState() {
         localStorage.setItem('jawhara_kitchen', JSON.stringify(kitchenOrders));
         localStorage.setItem('jawhara_ready', JSON.stringify(readyOrders));
@@ -168,28 +140,16 @@
 
     function init(r) {
         role = r;
-        audioCtx.resume();
         document.getElementById('role-selector').style.display = 'none';
         document.getElementById('nav').style.display = 'flex';
-        
         kitchenOrders = JSON.parse(localStorage.getItem('jawhara_kitchen') || '[]');
         readyOrders = JSON.parse(localStorage.getItem('jawhara_ready') || '[]');
-
-        if(role === 'cashier') {
-            generateKeypad();
-            go('cashier');
-            renderReadyOrders();
-            document.getElementById('n-kitchen').style.display = 'none';
-        } else {
-            go('kitchen');
-            renderKitchenOrders();
-            document.getElementById('n-cashier').style.display = 'none';
-        }
+        if(role === 'cashier') { generateKeypad(); go('cashier'); renderReadyOrders(); document.getElementById('n-kitchen').style.display = 'none'; }
+        else { go('kitchen'); renderKitchenOrders(); document.getElementById('n-cashier').style.display = 'none'; }
     }
 
     function generateKeypad() {
         const kp = document.getElementById('keypad');
-        kp.innerHTML = "";
         for(let i=1; i<=50; i++) {
             const btn = document.createElement('div');
             btn.className = 'key-btn'; btn.innerText = i;
@@ -203,16 +163,31 @@
         btn.classList.add('selected'); selectedTable = num;
     }
 
-    function add(name, price) {
+    // وظائف الكتابة الجديدة
+    function quickAdd(word) {
         playTapSound();
-        currentOrder.push(name); totalPrice += price;
+        document.getElementById('food-name').value += word + " ";
+    }
+
+    function manualAdd() {
+        playTapSound();
+        const name = document.getElementById('food-name').value.trim();
+        const price = parseInt(document.getElementById('food-price').value) || 0;
+        if(!name) return;
+        
+        currentOrder.push(name);
+        totalPrice += price;
+        
         document.getElementById('items-list').innerText = currentOrder.join(' + ');
         document.getElementById('top-total').innerText = totalPrice.toLocaleString();
+        
+        document.getElementById('food-name').value = "";
+        document.getElementById('food-price').value = "";
     }
 
     function sendOrder() {
         playTapSound();
-        if(!selectedTable || currentOrder.length === 0) { showMyAlert("اختر طاولة ووجبة!"); return; }
+        if(!selectedTable || currentOrder.length === 0) { showMyAlert("اختر طاولة واكتب الطلب!"); return; }
         channel.publish('msg', { table: selectedTable, items: currentOrder.join(' - ') });
         bell.play().catch(()=>{});
         showMyAlert("تم الإرسال للمطبخ ✅");
@@ -259,11 +234,10 @@
         list.innerHTML = "";
         if(readyOrders.length > 0) pane.style.display = 'block';
         else pane.style.display = 'none';
-
         readyOrders.forEach((t, i) => {
             const item = document.createElement('div');
             item.className = 'ready-item';
-            item.innerHTML = `<span>طاولة ${t} جاهزة</span><button onclick="confirmReady(${i})" style="background:var(--green); border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">تأكيد التسليم</button>`;
+            item.innerHTML = `<span>طاولة ${t} جاهزة</span><button onclick="confirmReady(${i})" style="background:var(--green); border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">تأكيد</button>`;
             list.appendChild(item);
         });
     }
@@ -278,15 +252,13 @@
     function clearOrder() {
         currentOrder = []; totalPrice = 0; selectedTable = '';
         document.getElementById('top-total').innerText = "0";
-        document.getElementById('items-list').innerText = "أختر الوجبات...";
+        document.getElementById('items-list').innerText = "سجل الطلبات فارغ...";
         document.querySelectorAll('.key-btn').forEach(k => k.classList.remove('selected'));
     }
 
     function go(v) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById(v).classList.add('active');
-        if(document.getElementById('n-'+v)) document.getElementById('n-'+v).classList.add('active');
     }
 
     function showMyAlert(m) {
