@@ -16,44 +16,46 @@
 
         /* شاشة الاختيار */
         #role-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
-        .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; box-shadow: 0 0 15px var(--pink); }
+        .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; box-shadow: 0 0 15px var(--pink); cursor: pointer; }
 
         header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold); }
         header span { font-weight: 800; font-size: 20px; color: var(--gold); }
         
         .nav-bar { display: none; background: #000; border-bottom: 1px solid #222; }
-        .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #666; font-weight: bold; }
+        .nav-item { flex: 1; padding: 15px; border: none; background: transparent; color: #666; font-weight: bold; cursor: pointer; }
         .nav-item.active { color: var(--pink); border-bottom: 3px solid var(--pink); }
 
         .container { flex: 1; padding: 15px; overflow-y: auto; background: #0a0a0a; }
         .view { display: none; flex-direction: column; gap: 15px; }
         .view.active { display: flex; }
 
-        /* المنيو */
-        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; margin: 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
+        /* المنيو والأزرار */
+        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; margin: 15px 0 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; position: relative; }
-        .img-container { width: 100%; height: 100px; background: #222; display: flex; align-items: center; justify-content: center; position: relative; }
+        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; position: relative; cursor: pointer; transition: transform 0.1s; }
+        .menu-item-card:active { transform: scale(0.92); border-color: var(--pink); }
+        
+        .img-container { width: 100%; height: 100px; background: #222; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .placeholder { position: absolute; font-size: 30px; }
-        .item-details { padding: 10px; text-align: center; }
+        .item-details { padding: 10px; text-align: center; pointer-events: none; }
         .item-name { display: block; font-size: 13px; font-weight: 700; }
         .item-price { display: block; font-size: 12px; color: var(--gold); font-weight: 800; }
 
         /* الفاتورة */
-        input#tabNum { width: 100%; background: #000; border: 2px solid var(--pink); color: var(--pink); padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; font-weight: 800; box-shadow: 0 0 10px var(--pink); }
+        input#tabNum { width: 100%; background: #000; border: 2px solid var(--pink); color: var(--pink); padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 15px; }
         #orderSummary { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px dashed var(--gold); }
         #total-price { font-size: 22px; color: var(--green); font-weight: 800; text-align: center; }
-        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; background: var(--gold); cursor: pointer; }
+        .btn-send { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; background: var(--gold); cursor: pointer; margin-top: 15px; }
 
         /* الجاهز */
         #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 12px; padding: 12px; border: 1px solid var(--green); display: none; }
         .ready-item { background: #000; padding: 10px; border-radius: 10px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 
         /* المطبخ */
-        .order-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 2px solid var(--pink); box-shadow: 0 0 15px var(--pink); margin-bottom: 15px; }
+        .order-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 2px solid var(--pink); margin-bottom: 15px; }
         .card-items { font-size: 30px; font-weight: 900; margin: 15px 0; }
-        .btn-done { width: 100%; padding: 20px; background: var(--green); border: none; border-radius: 15px; font-weight: 800; font-size: 24px; box-shadow: 0 0 15px var(--green); }
+        .btn-done { width: 100%; padding: 20px; background: var(--green); border: none; border-radius: 15px; font-weight: 800; font-size: 24px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -82,15 +84,23 @@
             <div id="ready-list-cashier"></div>
         </div>
 
-        <div class="section-title">الوجبات 🍗</div>
+        <div class="section-title">الوجبات العائلية 🍗</div>
         <div class="menu-grid">
             <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
                 <div class="img-container"><span class="placeholder">🍗</span><img src="https://images.unsplash.com/photo-1562967914-608f82629710?w=200"></div>
-                <div class="item-details"><span class="item-name">جامبو بلس 18</span><span class="item-price">40,000 د.ع</span></div>
+                <div class="item-details"><span class="item-name">جامبو بلس 18 قطعة</span><span class="item-price">40,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
                 <div class="img-container"><span class="placeholder">🍟</span><img src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200"></div>
-                <div class="item-details"><span class="item-name">جامبو عائلي 15</span><span class="item-price">33,000 د.ع</span></div>
+                <div class="item-details"><span class="item-name">جامبو عائلي 15 قطعة</span><span class="item-price">33,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('كودو دجاج 12', 30000)">
+                <div class="img-container"><span class="placeholder">🍗</span><img src="https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=200"></div>
+                <div class="item-details"><span class="item-name">كودو دجاج 12 قطعة</span><span class="item-price">30,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('وجبة القرمشة 3', 9000)">
+                <div class="img-container"><span class="placeholder">🍗</span><img src="https://images.unsplash.com/photo-1569058242253-92a9c71f9867?w=200"></div>
+                <div class="item-details"><span class="item-name">وجبة القرمشة 3 قطع</span><span class="item-price">9,000 د.ع</span></div>
             </div>
         </div>
 
@@ -100,9 +110,17 @@
                 <div class="img-container"><span class="placeholder">🍔</span><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200"></div>
                 <div class="item-details"><span class="item-name">برجر كلاسيك</span><span class="item-price">6,000 د.ع</span></div>
             </div>
+            <div class="menu-item-card" onclick="add('برجر دجاج', 5500)">
+                <div class="img-container"><span class="placeholder">🍗</span><img src="https://images.unsplash.com/photo-1619177386214-41d182281898?w=200"></div>
+                <div class="item-details"><span class="item-name">برجر دجاج</span><span class="item-price">5,500 د.ع</span></div>
+            </div>
             <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
                 <div class="img-container"><span class="placeholder">🍔</span><img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=200"></div>
                 <div class="item-details"><span class="item-name">دبل برجر</span><span class="item-price">8,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('ستيك برجر', 8000)">
+                <div class="img-container"><span class="placeholder">🥩</span><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=200"></div>
+                <div class="item-details"><span class="item-name">ستيك برجر</span><span class="item-price">8,000 د.ع</span></div>
             </div>
         </div>
 
@@ -111,7 +129,7 @@
             <div id="total-price">المجموع: 0 دينار</div>
         </div>
         <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
-        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin-top:10px; font-weight:bold;">❌ مسح</button>
+        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin-top:10px; font-weight:bold; cursor:pointer;">❌ مسح القائمة</button>
     </div>
 
     <div id="kitchen" class="view"><div id="k-list"></div></div>
@@ -121,7 +139,7 @@
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v20-final');
+    const channel = ably.channels.get('jawhara-final-v21');
     
     let currentOrder = [], totalPrice = 0, role = '';
 
@@ -164,7 +182,7 @@
             const list = document.getElementById('ready-list-cashier');
             const item = document.createElement('div');
             item.className = 'ready-item';
-            item.innerHTML = `<span>طاولة ${d.table} جاهزة</span><button onclick="confirmDeliver(this)" style="background:var(--green); border:none; padding:8px; border-radius:8px; font-weight:bold;">تأكيد التسليم</button>`;
+            item.innerHTML = `<span>طاولة ${d.table} جاهزة</span><button onclick="confirmDeliver(this)" style="background:var(--green); border:none; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد التسليم</button>`;
             list.appendChild(item);
             bell.play().catch(()=>{});
         } else if(!d.type && role === 'kitchen') {
