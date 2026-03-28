@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS 💎</title>
+    <title>الجوهرة POS Pro 💎</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
@@ -13,10 +13,9 @@
 
         #alert-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--pink); color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 800; z-index: 10000; display: none; box-shadow: 0 0 20px var(--pink); }
 
-        /* السعر الفوق الكيوت */
         .top-price-badge { background: #000; border: 2px solid var(--green); border-radius: 20px; padding: 10px; margin-bottom: 10px; text-align: center; box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
         .top-price-badge span { display: block; font-size: 11px; color: #aaa; }
-        .top-price-badge div { font-size: 24px; color: var(--green); font-weight: 900; }
+        .top-price-badge div { font-size: 26px; color: var(--green); font-weight: 900; }
 
         #role-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
         .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; cursor: pointer; }
@@ -32,11 +31,9 @@
         .view { display: none; flex-direction: column; gap: 10px; }
         .view.active { display: flex; }
 
-        /* خانة التسليم */
         #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 15px; padding: 12px; border: 2px solid var(--green); display: none; margin-bottom: 10px; }
         .ready-item { background: #000; padding: 10px; border-radius: 10px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 
-        /* الكيبورد الأفقي */
         .keypad-container { background: var(--card-bg); padding: 10px; border-radius: 15px; border: 1px solid var(--pink); margin-bottom: 10px; }
         .keypad-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; }
         .key-btn { flex: 0 0 55px; height: 55px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
@@ -141,7 +138,6 @@
 </div>
 
 <script>
-    // نظام صوت النقرات
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTapSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -157,13 +153,14 @@
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v27');
+    const channel = ably.channels.get('jawhara-v28');
 
     let currentOrder = [], totalPrice = 0, role = '', selectedTable = '';
 
     function init(r) {
         role = r;
         audioCtx.resume();
+        bell.play().then(() => { bell.pause(); bell.currentTime = 0; }).catch(()=>{});
         document.getElementById('role-selector').style.display = 'none';
         document.getElementById('nav').style.display = 'flex';
         if(role === 'cashier') generateKeypad();
@@ -196,6 +193,7 @@
         playTapSound();
         if(!selectedTable || currentOrder.length === 0) { showMyAlert("اختر طاولة ووجبة!"); return; }
         channel.publish('msg', { table: selectedTable, items: currentOrder.join(' - '), total: totalPrice.toLocaleString() });
+        bell.play().catch(()=>{}); // صوت الجرس هنا
         showMyAlert("تم الإرسال للمطبخ 🚀");
         clearOrder();
     }
