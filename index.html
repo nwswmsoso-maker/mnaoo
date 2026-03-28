@@ -3,146 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS - النسخة المستقرة</title>
+    <title>الجوهرة POS - نسخة التمرير الحر</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
         :root { --pink: #ff69b4; --gold: #ffbf00; --bg: #0d1117; --green: #00e676; --card: #1c2331; }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; touch-action: manipulation; }
-        body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
-
-        /* الهيدر العلوي */
-        .top-header { background: #000; padding: 10px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; height: 55px; }
-        .v-text { color: var(--gold); font-size: 14px; }
-        .t-num { background: var(--pink); color: #000; padding: 2px 10px; border-radius: 6px; font-weight: 900; }
-
-        /* شريط الطاولات */
-        .tables-bar { background: #000; display: flex; overflow-x: auto; gap: 5px; padding: 8px; border-bottom: 1px solid #333; height: 60px; }
-        .t-btn { flex: 0 0 42px; height: 42px; background: #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid #444; font-size: 14px; }
-        .t-btn.active { background: var(--pink); color: #000; box-shadow: 0 0 8px var(--pink); }
-
-        /* المحتوى الرئيسي */
-        .content-area { flex: 1; display: flex; overflow: hidden; padding-bottom: 70px; }
-
-        /* جهة اليسار: ملخص الطلب والجاهز (نحيفة) */
-        .sidebar { width: 35%; display: flex; flex-direction: column; border-left: 2px solid #222; background: #05070a; }
-        .basket-view { flex: 2; overflow-y: auto; padding: 8px; border-bottom: 1px solid #333; }
-        .ready-view { flex: 1.5; overflow-y: auto; padding: 8px; background: #000; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .order-row { background: #161b22; padding: 6px; border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; font-size: 11px; border-right: 3px solid var(--pink); }
-        .ready-ticket { background: var(--card); border: 1px solid var(--green); border-radius: 6px; padding: 6px; margin-bottom: 6px; font-size: 11px; }
-        .btn-deliver { background: var(--green); color: #000; border: none; width: 100%; padding: 6px; border-radius: 4px; font-weight: 900; margin-top: 4px; }
+        /* السماح بالتمرير الطبيعي للجسم */
+        body { margin: 0; background: var(--bg); color: #fff; min-height: 100vh; overflow-y: auto; padding-bottom: 100px; }
 
-        /* جهة اليمين: المنيو (واسعة) */
-        .menu-grid-area { width: 65%; overflow-y: auto; padding: 10px; background: #080b12; }
-        .section-title { color: var(--gold); font-size: 13px; font-weight: 900; margin: 10px 0 5px; display: block; border-bottom: 1px solid #333; padding-bottom: 2px; }
-        .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .item-card { background: var(--card); border: 1px solid #333; border-radius: 10px; padding: 10px 4px; text-align: center; }
-        .item-card b { display: block; font-size: 12px; margin-bottom: 2px; }
-        .item-card i { color: var(--green); font-style: normal; font-size: 11px; font-weight: bold; }
+        /* الهيدر ثابت فوق */
+        .header-top { position: sticky; top: 0; z-index: 1000; background: #000; border-bottom: 2px solid var(--gold); padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .v-box { color: var(--gold); font-size: 14px; }
+        .t-active-box { background: var(--pink); color: #000; padding: 4px 12px; border-radius: 8px; font-weight: 900; }
 
-        /* الفوتر الثابت بالكامل */
-        .footer-send { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; border-top: 1px solid #333; display: flex; align-items: center; gap: 10px; height: 70px; z-index: 1000; }
-        .total-box { flex: 1; text-align: center; color: var(--green); font-size: 22px; font-weight: 900; border-left: 1px solid #333; }
-        .send-btn-action { flex: 2; background: var(--green); color: #000; border: none; border-radius: 12px; height: 50px; font-weight: 900; font-size: 20px; box-shadow: 0 4px 0 #005a2e; }
-        .send-btn-action:active { transform: translateY(2px); box-shadow: none; }
+        /* شريط الطاولات مرن */
+        .tables-scroll { position: sticky; top: 55px; z-index: 999; background: #000; display: flex; overflow-x: auto; gap: 8px; padding: 10px; border-bottom: 1px solid #333; }
+        .t-unit { flex: 0 0 45px; height: 45px; background: #222; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid #444; }
+        .t-unit.active { background: var(--pink); color: #000; box-shadow: 0 0 10px var(--pink); }
+
+        /* الحاوية الرئيسية بدون قيود ارتفاع */
+        .wrapper { display: flex; padding: 10px; gap: 10px; align-items: flex-start; }
+
+        /* المنيو يأخذ راحته بالطول */
+        .menu-side { flex: 2; display: flex; flex-direction: column; }
+        .cat-title { color: var(--gold); font-size: 16px; font-weight: 900; margin: 15px 0 10px; border-right: 4px solid var(--gold); padding-right: 10px; }
+        .grid-ui { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-item { background: var(--card); border: 1px solid #333; border-radius: 12px; padding: 18px 5px; text-align: center; }
+        .btn-item b { display: block; font-size: 14px; margin-bottom: 4px; }
+        .btn-item i { color: var(--green); font-style: normal; font-size: 12px; font-weight: bold; }
+
+        /* السلة والجاهز */
+        .info-side { flex: 1; position: sticky; top: 125px; display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 230px); }
+        .basket-box { flex: 1.5; background: #05070a; border: 1px solid #222; border-radius: 10px; overflow-y: auto; padding: 8px; }
+        .ready-box { flex: 1; background: #000; border: 1px solid var(--green); border-radius: 10px; overflow-y: auto; padding: 8px; }
+        
+        .line-item { background: #161b22; padding: 8px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 11px; border-left: 3px solid var(--pink); }
+        .ticket { background: #1c2331; border: 1px solid var(--green); border-radius: 8px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
+        .btn-del { background: var(--green); color: #000; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: 900; margin-top: 5px; }
+
+        /* زر الإرسال الطواف */
+        .floating-action { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #000; padding: 12px; border: 2px solid #333; border-radius: 20px; display: flex; align-items: center; gap: 15px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .total-price { flex: 1; color: var(--green); font-size: 26px; font-weight: 900; text-align: center; }
+        .btn-send-now { flex: 2; background: var(--green); color: #000; border: none; border-radius: 15px; height: 60px; font-weight: 900; font-size: 22px; box-shadow: 0 4px 0 #005a2e; }
+        .btn-send-now:active { transform: translateY(2px); box-shadow: none; }
     </style>
 </head>
 <body>
 
-<div id="start-screen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
-    <h1 style="color:var(--gold); font-size:40px;">الجوهرة 💎</h1>
-    <button onclick="entry('cashier')" style="width:80%; padding:20px; background:var(--pink); border-radius:15px; font-weight:900; font-size:22px; border:none;">كاشير 🛒</button>
-    <button onclick="entry('kitchen')" style="width:80%; padding:20px; border-radius:15px; border:2px solid #444; color:#fff; background:none; font-size:20px;">مطبخ 👨‍🍳</button>
+<div id="entry-screen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+    <h1 style="color:var(--gold); font-size:45px;">الجوهرة 💎</h1>
+    <button onclick="start('cashier')" style="width:85%; padding:25px; background:var(--pink); border-radius:20px; font-weight:900; font-size:24px; border:none;">كاشير 🛒</button>
+    <button onclick="start('kitchen')" style="width:85%; padding:25px; border-radius:20px; border:2px solid #444; color:#fff; background:none; font-size:22px;">مطبخ 👨‍🍳</button>
 </div>
 
-<div id="cashier-ui" style="display:none; height:100%; flex-direction:column;">
-    <div class="top-header">
-        <div class="v-text">💰 مبيعات: <b id="v-total">0</b></div>
-        <div class="t-num">طاولة: <span id="t-active">--</span></div>
+<div id="pos-ui" style="display:none;">
+    <div class="header-top">
+        <div class="v-box">💰 مبيعات اليوم: <b id="v-val">0</b></div>
+        <div class="t-active-box">طاولة: <span id="t-disp">--</span></div>
     </div>
 
-    <div class="tables-bar" id="t-list"></div>
+    <div class="tables-scroll" id="t-list"></div>
 
-    <div class="content-area">
-        <div class="sidebar">
-            <div class="basket-view" id="b-list"></div>
-            <div class="ready-view">
-                <div style="color:var(--green); font-size:10px; font-weight:900; margin-bottom:5px;">🔔 جاهز للتسليم:</div>
-                <div id="ready-list"></div>
+    <div class="wrapper">
+        <div class="info-side">
+            <div class="basket-box" id="b-list"></div>
+            <div class="ready-box">
+                <div style="color:var(--green); font-size:12px; font-weight:900; margin-bottom:8px;">🔔 طلبات كملت:</div>
+                <div id="ready-ui"></div>
             </div>
         </div>
 
-        <div class="menu-grid-area">
-            <span class="section-title">🍔 برگرات</span>
-            <div class="items-grid">
-                <div class="item-card" onclick="add('برگر لحم', 4000)"><b>برگر لحم</b><i>4,000</i></div>
-                <div class="item-card" onclick="add('برگر دبل', 6000)"><b>برگر دبل</b><i>6,000</i></div>
-                <div class="item-card" onclick="add('كرسبي', 4500)"><b>كرسبي</b><i>4,500</i></div>
-                <div class="item-card" onclick="add('زنجر حار', 5000)"><b>زنجر حار</b><i>5,000</i></div>
-                <div class="item-card" onclick="add('تشيز برگر', 5500)"><b>تشيز برگر</b><i>5,500</i></div>
+        <div class="menu-side">
+            <div class="cat-title">🍔 برگرات</div>
+            <div class="grid-ui">
+                <div class="btn-item" onclick="add('برگر لحم', 4000)"><b>برگر لحم</b><i>4,000</i></div>
+                <div class="btn-item" onclick="add('برگر دبل', 6000)"><b>برگر دبل</b><i>6,000</i></div>
+                <div class="btn-item" onclick="add('كرسبي', 4500)"><b>كرسبي</b><i>4,500</i></div>
+                <div class="btn-item" onclick="add('زنجر حار', 5000)"><b>زنجر حار</b><i>5,000</i></div>
+                <div class="btn-item" onclick="add('تشيز برگر', 5500)"><b>تشيز برگر</b><i>5,500</i></div>
             </div>
 
-            <span class="section-title">🍟 مقبلات</span>
-            <div class="items-grid">
-                <div class="item-card" onclick="add('بطاطا عادي', 2000)"><b>بطاطا</b><i>2,000</i></div>
-                <div class="item-card" onclick="add('بطاطا لارج', 3000)"><b>بطاطا لارج</b><i>3,000</i></div>
-                <div class="item-card" onclick="add('بطاطا جبن', 3500)"><b>بطاطا جبن</b><i>3,500</i></div>
-                <div class="item-card" onclick="add('حلقات بصل', 2500)"><b>بصل</b><i>2,500</i></div>
-                <div class="item-card" onclick="add('ناجت 6ق', 4000)"><b>ناجت</b><i>4,000</i></div>
+            <div class="cat-title">🍟 مقبلات</div>
+            <div class="grid-ui">
+                <div class="btn-item" onclick="add('بطاطا عادي', 2000)"><b>بطاطا</b><i>2,000</i></div>
+                <div class="btn-item" onclick="add('بطاطا لارج', 3000)"><b>بطاطا لارج</b><i>3,000</i></div>
+                <div class="btn-item" onclick="add('بطاطا جبن', 3500)"><b>بطاطا جبن</b><i>3,500</i></div>
+                <div class="btn-item" onclick="add('حلقات بصل', 2500)"><b>بصل</b><i>2,500</i></div>
+                <div class="btn-item" onclick="add('ناجت 6ق', 4000)"><b>ناجت</b><i>4,000</i></div>
             </div>
 
-            <span class="section-title">🌯 ساندويش</span>
-            <div class="items-grid">
-                <div class="item-card" onclick="add('فلافل', 1500)"><b>فلافل</b><i>1,500</i></div>
-                <div class="item-card" onclick="add('شورما دجاج', 3500)"><b>شورما دجاج</b><i>3,500</i></div>
-                <div class="item-card" onclick="add('شورما لحم', 4500)"><b>شورما لحم</b><i>4,500</i></div>
-                <div class="item-card" onclick="add('كص دجاج', 3000)"><b>كص دجاج</b><i>3,000</i></div>
+            <div class="cat-title">🌯 ساندويشات</div>
+            <div class="grid-ui">
+                <div class="btn-item" onclick="add('فلافل', 1500)"><b>فلافل</b><i>1,500</i></div>
+                <div class="btn-item" onclick="add('شورما دجاج', 3500)"><b>شورما دجاج</b><i>3,500</i></div>
+                <div class="btn-item" onclick="add('شورما لحم', 4500)"><b>شورما لحم</b><i>4,500</i></div>
+                <div class="btn-item" onclick="add('كص دجاج', 3000)"><b>كص دجاج</b><i>3,000</i></div>
             </div>
 
-            <span class="section-title">🥤 مشروبات</span>
-            <div class="items-grid">
-                <div class="item-card" onclick="add('قوطية', 1000)"><b>قوطية</b><i>1,000</i></div>
-                <div class="item-card" onclick="add('عصير معلب', 1500)"><b>عصير</b><i>1,500</i></div>
-                <div class="item-card" onclick="add('ماء', 500)"><b>ماء</b><i>500</i></div>
-                <div class="item-card" onclick="add('فريش', 2500)"><b>فريش</b><i>2,500</i></div>
+            <div class="cat-title">🥤 مشروبات</div>
+            <div class="grid-ui">
+                <div class="btn-item" onclick="add('قوطية', 1000)"><b>قوطية</b><i>1,000</i></div>
+                <div class="btn-item" onclick="add('عصير معلب', 1500)"><b>عصير</b><i>1,500</i></div>
+                <div class="btn-item" onclick="add('ماء', 500)"><b>ماء</b><i>500</i></div>
+                <div class="btn-item" onclick="add('فريش', 2500)"><b>فريش</b><i>2,500</i></div>
             </div>
 
-            <span class="section-title">🔥 وجبات كومبو</span>
-            <div class="items-grid">
-                <div class="item-card" onclick="add('كومبو برگر', 6500)"><b>كومبو برگر</b><i>6,500</i></div>
-                <div class="item-card" onclick="add('كومبو زنجر', 7500)"><b>كومبو زنجر</b><i>7,500</i></div>
-                <div class="item-card" onclick="add('كومبو شورما', 6000)"><b>كومبو شورما</b><i>6,000</i></div>
+            <div class="cat-title">🔥 وجبات كومبو</div>
+            <div class="grid-ui">
+                <div class="btn-item" onclick="add('كومبو برگر', 6500)"><b>كومبو برگر</b><i>6,500</i></div>
+                <div class="btn-item" onclick="add('كومبو زنجر', 7500)"><b>كومبو زنجر</b><i>7,500</i></div>
+                <div class="btn-item" onclick="add('كومبو شورما', 6000)"><b>كومبو شورما</b><i>6,000</i></div>
             </div>
         </div>
     </div>
 
-    <div class="footer-send">
-        <div class="total-box"><span id="order-total">0</span> <small style="font-size:10px">د.ع</small></div>
-        <button class="send-btn-action" onclick="send()">إرسال للمطبخ 🚀</button>
+    <div class="floating-action">
+        <div class="total-price"><span id="sum-disp">0</span> <small style="font-size:12px">د.ع</small></div>
+        <button class="btn-send-now" onclick="sendToK()">إرسال للمطبخ 🚀</button>
     </div>
 </div>
 
-<div id="kitchen-ui" style="display:none; padding:15px; height:100%; overflow-y:auto;">
-    <h2 style="text-align:center; color:var(--pink)">👨‍🍳 المطبخ</h2>
+<div id="kitchen-ui" style="display:none; padding:20px; min-height:100vh;">
+    <h2 style="text-align:center; color:var(--pink)">👨‍🍳 طلبات المطبخ</h2>
     <div id="k-list"></div>
 </div>
 
 <script>
     const ably = new Ably.Realtime('Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU');
-    const chan = ably.channels.get('jawhara-final-fixed');
+    const chan = ably.channels.get('jawhara-unlocked-v1');
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
     let basket = [], total = 0, table = "";
 
-    function entry(r) {
-        document.getElementById('start-screen').style.display = 'none';
+    function start(r) {
+        document.getElementById('entry-screen').style.display = 'none';
         if(r === 'cashier') {
-            document.getElementById('cashier-ui').style.display = 'flex';
-            updateVaultUI();
+            document.getElementById('pos-ui').style.display = 'block';
+            updateVault();
             for(let i=1; i<=30; i++) {
-                const b = document.createElement('div'); b.className = 't-btn'; b.innerText = i;
-                b.onclick = () => { document.querySelectorAll('.t-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); table = i; document.getElementById('t-active').innerText = i; };
+                const b = document.createElement('div'); b.className = 't-unit'; b.innerText = i;
+                b.onclick = () => { document.querySelectorAll('.t-unit').forEach(x=>x.classList.remove('active')); b.classList.add('active'); table = i; document.getElementById('t-disp').innerText = i; };
                 document.getElementById('t-list').appendChild(b);
             }
             renderReady();
@@ -151,20 +153,20 @@
 
     function add(n, p) {
         basket.push({n, p}); total += p;
-        document.getElementById('order-total').innerText = total.toLocaleString();
-        const d = document.createElement('div'); d.className = 'order-row';
+        document.getElementById('sum-disp').innerText = total.toLocaleString();
+        const d = document.createElement('div'); d.className = 'line-item';
         d.innerHTML = `<span>${n}</span><b>${p.toLocaleString()}</b>`;
         document.getElementById('b-list').prepend(d);
     }
 
-    function send() {
-        if(!table || basket.length === 0) { alert("اختر طاولة وطلب!"); return; }
+    function sendToK() {
+        if(!table || basket.length === 0) { alert("اختر الطاولة والطلب!"); return; }
         chan.publish('k', { t: table, i: basket.map(x=>x.n).join(' + '), s: total });
         basket = []; total = 0; table = "";
-        document.getElementById('order-total').innerText = "0";
+        document.getElementById('sum-disp').innerText = "0";
         document.getElementById('b-list').innerHTML = "";
-        document.getElementById('t-active').innerText = "--";
-        document.querySelectorAll('.t-btn').forEach(x=>x.classList.remove('active'));
+        document.getElementById('t-disp').innerText = "--";
+        document.querySelectorAll('.t-unit').forEach(x=>x.classList.remove('active'));
     }
 
     chan.subscribe('k', m => {
@@ -176,15 +178,15 @@
     chan.subscribe('c', m => {
         let d = JSON.parse(localStorage.getItem('r_st') || '[]');
         d.push(m.data); localStorage.setItem('r_st', JSON.stringify(d));
-        bell.play(); if(document.getElementById('cashier-ui').style.display === 'flex') renderReady();
+        bell.play(); if(document.getElementById('pos-ui').style.display === 'block') renderReady();
     });
 
     function renderKitchen() {
         const div = document.getElementById('k-list'); div.innerHTML = "";
         let d = JSON.parse(localStorage.getItem('k_st') || '[]');
         d.forEach((o, i) => {
-            const c = document.createElement('div'); c.style = "background:var(--card); border:2px solid var(--pink); border-radius:12px; padding:15px; margin-bottom:12px;";
-            c.innerHTML = `<div style="color:var(--gold)">طاولة ${o.t}</div><div style="font-size:22px; margin:10px 0;">${o.i}</div><button onclick="finK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:10px; font-weight:bold;">تم ✅</button>`;
+            const c = document.createElement('div'); c.style = "background:var(--card); border:2px solid var(--pink); border-radius:15px; padding:20px; margin-bottom:15px;";
+            c.innerHTML = `<div style="color:var(--gold)">طاولة ${o.t}</div><div style="font-size:24px; margin:15px 0;">${o.i}</div><button onclick="finK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:12px; font-weight:bold;">جهز الطلب ✅</button>`;
             div.prepend(c);
         });
     }
@@ -197,11 +199,11 @@
     }
 
     function renderReady() {
-        const div = document.getElementById('ready-list'); div.innerHTML = "";
+        const div = document.getElementById('ready-ui'); div.innerHTML = "";
         let d = JSON.parse(localStorage.getItem('r_st') || '[]');
         d.forEach((o, i) => {
-            const c = document.createElement('div'); c.className = 'ready-ticket';
-            c.innerHTML = `<div style="color:var(--pink)">طاولة ${o.t}</div><div>${o.i}</div><button class="btn-deliver" onclick="deliv(${i})">تسليم</button>`;
+            const c = document.createElement('div'); c.className = 'ticket';
+            c.innerHTML = `<div style="color:var(--pink)">طاولة ${o.t}</div><div>${o.i}</div><button class="btn-del" onclick="deliv(${i})">تسليم</button>`;
             div.prepend(c);
         });
     }
@@ -212,12 +214,12 @@
         localStorage.setItem('r_st', JSON.stringify(d));
         let s = parseInt(localStorage.getItem('v_st') || '0'); s += ord.s;
         localStorage.setItem('v_st', s.toString());
-        updateVaultUI(); renderReady();
+        updateVault(); renderReady();
     }
 
-    function updateVaultUI() {
+    function updateVault() {
         const s = parseInt(localStorage.getItem('v_st') || '0');
-        document.getElementById('v-total').innerText = s.toLocaleString();
+        document.getElementById('v-val').innerText = s.toLocaleString();
     }
 </script>
 </body>
