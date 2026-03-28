@@ -3,219 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS Pro 💎</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>الجوهرة POS Pro - النسخة الملكية 👑</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
-        :root { --gold: #ffbf00; --pink: #ff69b4; --bg: #0a0a0a; --card-bg: #161616; --green: #2ecc71; --red: #e74c3c; }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        :root { --gold: #ffbf00; --pink: #ff69b4; --bg: #0d1117; --key-bg: #1c2331; --key-active: #39445a; --btn-blue: #8ab4f8; --green: #00e676; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        #alert-box { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--pink); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: 800; z-index: 10000; display: none; }
+        /* الهيدر وشريط المعلومات */
+        .pos-header { padding: 10px 15px; background: rgba(0,0,0,0.3); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .table-indicator { background: var(--pink); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; }
+        .total-amount { color: var(--green); font-size: 28px; font-weight: 900; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
 
-        header { padding: 10px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); flex-shrink: 0; }
-        
-        .container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .view { display: none; flex-direction: column; height: 100%; }
-        .view.active { display: flex; }
+        /* منطقة عرض الطلب */
+        .display-area { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 12px; border-radius: 12px; font-size: 22px; min-height: 55px; margin-bottom: 10px; color: var(--btn-blue); }
+        .orders-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .order-item { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; border-right: 5px solid var(--gold); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* منطقة العرض */
-        .display-section { padding: 10px; background: #000; border-bottom: 1px solid #222; }
-        .top-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .price-tag { color: var(--green); font-size: 24px; font-weight: 900; }
-        
-        .order-input-view { background: var(--card-bg); padding: 12px; border-radius: 10px; min-height: 50px; font-size: 20px; color: var(--pink); border: 1px solid #333; margin-bottom: 5px; text-align: right; }
+        /* الكيبورد الاحترافي (نفس صورتك) */
+        .gboard { background: #010409; padding: 5px; border-top: 1px solid #333; }
+        .row { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
+        .k { background: var(--key-bg); flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 18px; font-weight: 600; box-shadow: 0 2px 0 #000; transition: 0.1s; }
+        .k:active { background: var(--key-active); transform: translateY(2px); box-shadow: none; }
+        .k-num { height: 38px; font-size: 15px; background: #21262d; opacity: 0.9; }
+        .k-wide { flex: 1.5; background: #30363d; }
+        .k-space { flex: 4; background: #30363d; font-size: 14px; color: #8b949e; }
+        .k-action { background: var(--btn-blue); color: #000; font-weight: 800; }
+        .k-send { background: var(--green); color: #000; font-weight: 900; }
 
-        /* الكيبورد العربي المدمج */
-        .custom-keyboard { background: #111; padding: 5px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; border-top: 1px solid #333; }
-        .key { background: #222; border: 1px solid #333; color: #fff; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 16px; font-weight: bold; }
-        .key:active { background: var(--pink); color: #000; }
-        .key.wide { grid-column: span 2; background: #333; }
-        .key.action { background: var(--gold); color: #000; grid-column: span 2; }
-        .key.delete { background: var(--red); grid-column: span 2; }
-        .key.space { grid-column: span 4; background: #333; }
+        /* شريط الطاولات العلوي */
+        .tables-bar { display: flex; overflow-x: auto; gap: 10px; padding: 10px; background: #000; border-bottom: 1px solid #222; }
+        .t-btn { flex: 0 0 45px; height: 45px; background: #21262d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #30363d; }
+        .t-btn.active { background: var(--pink); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--pink); }
 
-        /* أرقام الطاولات */
-        .tables-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 10px; background: #000; border-bottom: 1px solid #222; }
-        .table-btn { flex: 0 0 50px; height: 50px; border: 1px solid #444; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
-        .table-btn.selected { background: var(--pink); color: #000; border-color: #fff; }
-
-        /* المطبخ */
-        .order-card { background: var(--card-bg); border-radius: 15px; padding: 15px; border: 2px solid var(--pink); margin: 10px; }
-        .btn-done { width: 100%; padding: 15px; background: var(--green); border: none; border-radius: 10px; font-weight: 800; font-size: 20px; }
-
-        #role-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-        .role-btn { width: 80%; padding: 25px; border-radius: 15px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 22px; font-weight: 800; }
+        #kitchen-view { display: none; padding: 10px; overflow-y: auto; height: 100vh; }
+        .kitchen-card { background: #161b22; border: 2px solid var(--pink); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-<div id="alert-box"></div>
-
-<div id="role-selector">
-    <h1 style="color:var(--gold)">الجوهرة 💎</h1>
-    <button class="role-btn" onclick="init('cashier')">🛒 واجهة الكاشير</button>
-    <button class="role-btn" onclick="init('kitchen')">👨‍🍳 واجهة المطبخ</button>
+<div id="role-box" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+    <h1 style="color:var(--gold); font-size:40px; margin:0;">الجوهرة 💎</h1>
+    <button onclick="start('cashier')" style="width:80%; padding:25px; border-radius:15px; background:var(--pink); font-weight:900; font-size:20px;">🛒 دخول الكاشير</button>
+    <button onclick="start('kitchen')" style="width:80%; padding:25px; border-radius:15px; background:none; border:2px solid #333; color:#fff; font-weight:900; font-size:20px;">👨‍🍳 دخول المطبخ</button>
 </div>
 
-<header><span>الجوهرة POS Pro</span></header>
-
-<div class="container">
-    <div id="cashier" class="view">
-        <div class="tables-scroll" id="tables"></div>
-        
-        <div class="display-section">
-            <div class="top-info">
-                <span style="color:#888;">الطلب الحالي:</span>
-                <div class="price-tag"><span id="total-price">0</span> د.ع</div>
-            </div>
-            <div class="order-input-view" id="display-text">أبدأ الكتابة...</div>
-        </div>
-
-        <div style="flex:1; overflow-y:auto; padding:10px;" id="current-items-list">
-            </div>
-
-        <div class="custom-keyboard" id="kb">
-            <div class="key" onclick="k('1')">1</div><div class="key" onclick="k('2')">2</div><div class="key" onclick="k('3')">3</div>
-            <div class="key" onclick="k('4')">4</div><div class="key" onclick="k('5')">5</div><div class="key" onclick="k('6')">6</div>
-            <div class="key" onclick="k('7')">7</div><div class="key" onclick="k('8')">8</div><div class="key" onclick="k('9')">9</div>
-            <div class="key" onclick="k('0')">0</div>
-            <div class="key" onclick="k('ق')">ق</div><div class="key" onclick="k('ف')">ف</div><div class="key" onclick="k('غ')">غ</div><div class="key" onclick="k('ع')">ع</div><div class="key" onclick="k('ه')">ه</div><div class="key" onclick="k('خ')">خ</div><div class="key" onclick="k('ح')">ح</div><div class="key" onclick="k('ج')">ج</div><div class="key" onclick="k('د')">د</div><div class="key" onclick="k('ش')">ش</div>
-            <div class="key" onclick="k('س')">س</div><div class="key" onclick="k('ي')">ي</div><div class="key" onclick="k('ب')">ب</div><div class="key" onclick="k('ل')">ل</div><div class="key" onclick="k('ا')">ا</div><div class="key" onclick="k('ت')">ت</div><div class="key" onclick="k('ن')">ن</div><div class="key" onclick="k('م')">م</div><div class="key" onclick="k('ك')">ك</div><div class="key" onclick="k('ط')">ط</div>
-            <div class="key" onclick="k('ئ')">ئ</div><div class="key" onclick="k('ء')">ء</div><div class="key" onclick="k('ؤ')">ؤ</div><div class="key" onclick="k('ر')">ر</div><div class="key" onclick="k('لا')">لا</div><div class="key" onclick="k('ى')">ى</div><div class="key" onclick="k('ة')">ة</div><div class="key" onclick="k('و')">و</div><div class="key" onclick="k('ز')">ز</div><div class="key" onclick="k('ظ')">ظ</div>
-            <div class="key delete" onclick="del()">مسح ⌫</div>
-            <div class="key space" onclick="k(' ')">مسافة</div>
-            <div class="key action" onclick="addToList()">إضافة وجبة +</div>
-            <div class="key action" style="background:var(--green)" onclick="sendOrder()">إرسال 🚀</div>
-        </div>
+<div id="cashier-view" style="display:none; height:100vh; flex-direction:column;">
+    <div class="pos-header">
+        <div class="table-indicator">طاولة: <span id="cur-t">--</span></div>
+        <div class="total-amount"><span id="cur-total">0</span> <small style="font-size:12px;">د.ع</small></div>
     </div>
 
-    <div id="kitchen" class="view">
-        <div id="k-list" style="overflow-y:auto;"></div>
+    <div class="tables-bar" id="t-list"></div>
+
+    <div class="display-area">
+        <div class="input-box" id="kb-display">أكتب الطلب...</div>
+        <div class="orders-list" id="items-container"></div>
     </div>
+
+    <div class="gboard">
+        <div class="row">
+            <div class="k k-num" onclick="press('1')">1</div><div class="k k-num" onclick="press('2')">2</div><div class="k k-num" onclick="press('3')">3</div><div class="k k-num" onclick="press('4')">4</div><div class="k k-num" onclick="press('5')">5</div>
+            <div class="k k-num" onclick="press('6')">6</div><div class="k k-num" onclick="press('7')">7</div><div class="k k-num" onclick="press('8')">8</div><div class="k k-num" onclick="press('9')">9</div><div class="k k-num" onclick="press('0')">0</div>
+        </div>
+        <div class="row">
+            <div class="k" onclick="press('ض')">ض</div><div class="k" onclick="press('ص')">ص</div><div class="k" onclick="press('ث')">ث</div><div class="k" onclick="press('ق')">ق</div><div class="k" onclick="press('ف')">ف</div><div class="k" onclick="press('غ')">غ</div><div class="k" onclick="press('ع')">ع</div><div class="k" onclick="press('ه')">ه</div><div class="k" onclick="press('خ')">خ</div><div class="k" onclick="press('ح')">ح</div><div class="k" onclick="press('ج')">ج</div>
+        </div>
+        <div class="row">
+            <div class="k" onclick="press('ش')">ش</div><div class="k" onclick="press('س')">س</div><div class="k" onclick="press('ي')">ي</div><div class="k" onclick="press('ب')">ب</div><div class="k" onclick="press('ل')">ل</div><div class="k" onclick="press('ا')">ا</div><div class="k" onclick="press('ت')">ت</div><div class="k" onclick="press('ن')">ن</div><div class="k" onclick="press('م')">م</div><div class="k" onclick="press('ك')">ك</div><div class="k" onclick="press('ط')">ط</div>
+        </div>
+        <div class="row">
+            <div class="k k-wide" onclick="backspace()">⌫</div>
+            <div class="k" onclick="press('ئ')">ئ</div><div class="k" onclick="press('ء')">ء</div><div class="k" onclick="press('ؤ')">ؤ</div><div class="k" onclick="press('ر')">ر</div><div class="k" onclick="press('ى')">ى</div><div class="k" onclick="press('ة')">ة</div><div class="k" onclick="press('و')">و</div><div class="k" onclick="press('ز')">ز</div><div class="k" onclick="press('ظ')">ظ</div><div class="k" onclick="press('د')">د</div>
+        </div>
+        <div class="row">
+            <div class="k k-wide">?123</div>
+            <div class="k k-space" onclick="press(' ')">العربية</div>
+            <div class="k k-wide k-action" onclick="addItem()">إضافة</div>
+            <div class="k k-wide k-send" onclick="sendToKitchen()">إرسال 🚀</div>
+        </div>
+    </div>
+</div>
+
+<div id="kitchen-view">
+    <h2 style="text-align:center; color:var(--gold);">👨‍🍳 طلبات المطبخ</h2>
+    <div id="kitchen-list"></div>
 </div>
 
 <script>
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
-    const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v80');
+    const channel = new Ably.Realtime('Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU').channels.get('jawhara-v110');
+    
+    let text = "", basket = [], total = 0, table = "";
+    let kitchenData = JSON.parse(localStorage.getItem('j_kitch') || '[]');
 
-    let typing = "", currentOrder = [], total = 0, selectedTable = "";
-    let kitchenOrders = [];
+    // قاعدة بيانات الأسعار التلقائية
+    const priceList = { "كص": 1500, "برجر": 2000, "لفه": 1000, "ببسي": 500, "لف": 1000, "لحم": 2000, "دجاج": 1500 };
 
-    function playTap() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.1, ctx.currentTime);
-        osc.start(); osc.stop(ctx.currentTime + 0.05);
-    }
-
-    function init(r) {
-        document.getElementById('role-selector').style.display = 'none';
-        if(r === 'cashier') {
-            document.getElementById('cashier').classList.add('active');
-            genTables();
+    function start(role) {
+        document.getElementById('role-box').style.display = 'none';
+        if(role === 'cashier') {
+            document.getElementById('cashier-view').style.display = 'flex';
+            renderTables();
         } else {
-            document.getElementById('kitchen').classList.add('active');
+            document.getElementById('kitchen-view').style.display = 'block';
             renderKitchen();
         }
-        // تحميل البيانات المخزنة لمنع الضياع عند الترسيت
-        kitchenOrders = JSON.parse(localStorage.getItem('j_kitchen') || '[]');
-        if(r === 'kitchen') renderKitchen();
     }
 
-    function genTables() {
-        const t = document.getElementById('tables');
-        for(let i=1; i<=30; i++) {
+    function renderTables() {
+        const div = document.getElementById('t-list');
+        for(let i=1; i<=40; i++) {
             const b = document.createElement('div');
-            b.className = 'table-btn'; b.innerText = i;
-            b.onclick = function() { 
-                playTap();
-                document.querySelectorAll('.table-btn').forEach(x => x.classList.remove('selected'));
-                this.classList.add('selected'); selectedTable = i;
+            b.className = 't-btn'; b.innerText = i;
+            b.onclick = () => {
+                document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active'));
+                b.classList.add('active'); table = i;
+                document.getElementById('cur-t').innerText = i;
             };
-            t.appendChild(b);
+            div.appendChild(b);
         }
     }
 
-    function k(char) {
-        playTap();
-        if(typing === "أبدأ الكتابة...") typing = "";
-        typing += char;
-        document.getElementById('display-text').innerText = typing;
+    function press(char) {
+        if(text === "أكتب الطلب...") text = "";
+        text += char;
+        document.getElementById('kb-display').innerText = text;
     }
 
-    function del() {
-        playTap();
-        typing = typing.slice(0, -1);
-        document.getElementById('display-text').innerText = typing || "أبدأ الكتابة...";
+    function backspace() {
+        text = text.slice(0, -1);
+        document.getElementById('kb-display').innerText = text || "أكتب الطلب...";
     }
 
-    function addToList() {
-        playTap();
-        if(!typing || typing === "أبدأ الكتابة...") return;
+    function addItem() {
+        if(!text || text === "أكتب الطلب...") return;
         
-        // استخراج السعر لو كتبه (مثلاً: برجر 5000)
-        let priceMatch = typing.match(/\d+/);
-        let p = priceMatch ? parseInt(priceMatch[0]) : 0;
+        let foundPrice = 0;
+        // البحث عن سعر الوجبة في قاعدة البيانات
+        for (let key in priceList) {
+            if (text.includes(key)) { foundPrice = priceList[key]; break; }
+        }
         
-        currentOrder.push(typing);
-        total += p;
+        // إذا الكاشير كتب رقم هو بنفسه، نستخدمه بدلاً من التلقائي
+        let manualPrice = parseInt(text.match(/\d+/) || 0);
+        let finalPrice = manualPrice > 0 ? manualPrice : foundPrice;
+
+        basket.push({ name: text, price: finalPrice });
+        total += finalPrice;
         
-        const item = document.createElement('div');
-        item.style = "background:#222; padding:10px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between;";
-        item.innerHTML = `<span>${typing}</span><b style="color:var(--gold)">${p.toLocaleString()}</b>`;
-        document.getElementById('current-items-list').prepend(item);
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'order-item';
+        itemDiv.innerHTML = `<span>${text}</span><b style="color:var(--gold)">${finalPrice.toLocaleString()}</b>`;
+        document.getElementById('items-container').prepend(itemDiv);
         
-        document.getElementById('total-price').innerText = total.toLocaleString();
-        typing = "";
-        document.getElementById('display-text').innerText = "أبدأ الكتابة...";
+        document.getElementById('cur-total').innerText = total.toLocaleString();
+        text = ""; document.getElementById('kb-display').innerText = "أكتب الطلب...";
     }
 
-    function sendOrder() {
-        playTap();
-        if(!selectedTable || currentOrder.length === 0) { alert("اختر طاولة وضف وجبة!"); return; }
-        channel.publish('msg', { table: selectedTable, items: currentOrder.join(' - ') });
-        clearAll();
+    function sendToKitchen() {
+        if(!table || basket.length === 0) { alert("حدد الطاولة وضف الوجبات!"); return; }
+        let summary = basket.map(b => b.name).join(' + ');
+        channel.publish('msg', { table: table, items: summary });
+        
+        // مسح الواجهة
+        basket = []; total = 0; text = ""; table = "";
+        document.getElementById('cur-total').innerText = "0";
+        document.getElementById('items-container').innerHTML = "";
+        document.getElementById('cur-t').innerText = "--";
+        document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active'));
         bell.play().catch(()=>{});
     }
 
-    function clearAll() {
-        currentOrder = []; total = 0; typing = ""; selectedTable = "";
-        document.getElementById('total-price').innerText = "0";
-        document.getElementById('display-text').innerText = "أبدأ الكتابة...";
-        document.getElementById('current-items-list').innerHTML = "";
-        document.querySelectorAll('.table-btn').forEach(x => x.classList.remove('selected'));
-    }
-
     channel.subscribe(msg => {
-        if(!msg.data.type) {
-            kitchenOrders.push(msg.data);
-            localStorage.setItem('j_kitchen', JSON.stringify(kitchenOrders));
-            renderKitchen();
-            bell.play().catch(()=>{});
-        }
+        kitchenData.push(msg.data);
+        localStorage.setItem('j_kitch', JSON.stringify(kitchenData));
+        renderKitchen();
+        bell.play().catch(()=>{});
     });
 
     function renderKitchen() {
-        const list = document.getElementById('k-list');
+        const list = document.getElementById('kitchen-list');
         if(!list) return;
         list.innerHTML = "";
-        kitchenOrders.forEach((o, i) => {
+        kitchenData.forEach((o, i) => {
             const card = document.createElement('div');
-            card.className = 'order-card';
-            card.innerHTML = `<div style="font-size:20px; color:var(--gold)">طاولة ${o.table}</div><div style="font-size:26px; margin:10px 0;">${o.items}</div><button class="btn-done" onclick="done(${i})">تم التجهيز ✅</button>`;
+            card.className = 'kitchen-card';
+            card.innerHTML = `<div style="color:var(--gold); font-weight:bold;">طاولة ${o.table}</div><div style="font-size:30px; margin:15px 0; font-weight:900;">${o.items}</div><button onclick="clearK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:10px; font-weight:900; font-size:20px;">تم التجهيز ✅</button>`;
             list.prepend(card);
         });
     }
 
-    function done(i) {
-        playTap();
-        kitchenOrders.splice(i, 1);
-        localStorage.setItem('j_kitchen', JSON.stringify(kitchenOrders));
+    function clearK(i) {
+        kitchenData.splice(i, 1);
+        localStorage.setItem('j_kitch', JSON.stringify(kitchenData));
         renderKitchen();
     }
 </script>
