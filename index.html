@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS Pro 💎</title>
+    <title>الجوهرة POS 💎</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
@@ -32,27 +32,28 @@
         .view { display: none; flex-direction: column; gap: 10px; }
         .view.active { display: flex; }
 
-        /* خانة التسليم (الجاهز) */
-        #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 15px; padding: 12px; border: 2px solid var(--green); display: none; margin-bottom: 10px; animation: glow 1.5s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px var(--green); } to { box-shadow: 0 0 15px var(--green); } }
+        /* خانة التسليم */
+        #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 15px; padding: 12px; border: 2px solid var(--green); display: none; margin-bottom: 10px; }
         .ready-item { background: #000; padding: 10px; border-radius: 10px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 
+        /* الكيبورد الأفقي */
         .keypad-container { background: var(--card-bg); padding: 10px; border-radius: 15px; border: 1px solid var(--pink); margin-bottom: 10px; }
         .keypad-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; }
         .key-btn { flex: 0 0 55px; height: 55px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
         .key-btn.selected { background: var(--pink); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--pink); }
 
+        .section-title { color: var(--gold); font-size: 16px; font-weight: 700; margin: 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; }
+        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; cursor: pointer; }
         .img-box { width: 100%; height: 90px; display: flex; align-items: center; justify-content: center; font-size: 40px; background: #111; }
         .item-details { padding: 8px; text-align: center; }
         .item-name { font-size: 13px; font-weight: 700; display: block; }
         .item-price { font-size: 12px; color: var(--gold); font-weight: 800; display: block; }
 
-        .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); margin-top: 10px; }
+        .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); margin-top: 10px; box-shadow: 0 0 15px var(--gold); }
 
         .order-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 2px solid var(--pink); margin-bottom: 15px; }
-        .card-items { font-size: 28px; font-weight: 900; margin: 15px 0; }
+        .card-items { font-size: 30px; font-weight: 900; margin: 15px 0; }
         .btn-done { width: 100%; padding: 20px; background: var(--green); border: none; border-radius: 15px; font-weight: 800; font-size: 24px; }
     </style>
 </head>
@@ -76,7 +77,7 @@
 <div class="container">
     <div id="cashier" class="view">
         <div class="top-price-badge">
-            <span>الحساب الحالي</span>
+            <span>مجموع الحساب</span>
             <div id="top-total">0 د.ع</div>
         </div>
 
@@ -89,32 +90,65 @@
             <div class="keypad-scroll" id="keypad"></div>
         </div>
 
+        <div class="section-title">الوجبات العائلية 🍗</div>
         <div class="menu-grid">
             <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
                 <div class="img-box">🍗</div>
                 <div class="item-details"><span class="item-name">جامبو بلس 18</span><span class="item-price">40,000 د.ع</span></div>
             </div>
+            <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
+                <div class="img-box">🍟</div>
+                <div class="item-details"><span class="item-name">جامبو عائلي 15</span><span class="item-price">33,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('كودو دجاج 12', 30000)">
+                <div class="img-box">🥪</div>
+                <div class="item-details"><span class="item-name">كودو دجاج 12</span><span class="item-price">30,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('وجبة القرمشة 3', 9000)">
+                <div class="img-box">🍗</div>
+                <div class="item-details"><span class="item-name">وجبة القرمشة 3</span><span class="item-price">9,000 د.ع</span></div>
+            </div>
+        </div>
+
+        <div class="section-title">البرجر الملكي 🍔</div>
+        <div class="menu-grid">
             <div class="menu-item-card" onclick="add('برجر كلاسيك', 6000)">
                 <div class="img-box">🍔</div>
                 <div class="item-details"><span class="item-name">برجر كلاسيك</span><span class="item-price">6,000 د.ع</span></div>
             </div>
+            <div class="menu-item-card" onclick="add('برجر دجاج', 5500)">
+                <div class="img-box">🍔</div>
+                <div class="item-details"><span class="item-name">برجر دجاج</span><span class="item-price">5,500 د.ع</span></div>
             </div>
+            <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
+                <div class="img-box">🍔</div>
+                <div class="item-details"><span class="item-name">دبل برجر</span><span class="item-price">8,000 د.ع</span></div>
+            </div>
+            <div class="menu-item-card" onclick="add('ستيك برجر', 8000)">
+                <div class="img-box">🥩</div>
+                <div class="item-details"><span class="item-name">ستيك برجر</span><span class="item-price">8,000 د.ع</span></div>
+            </div>
+        </div>
 
         <div id="orderSummary" style="background:var(--card-bg); padding:10px; margin-top:10px; border-radius:10px; text-align:center; color:#777;">
             <div id="items-list">أختر الوجبات...</div>
         </div>
         <button class="btn-send" onclick="sendOrder()">إرسال للمطبخ 🚀</button>
+        <button onclick="clearOrder()" style="background:none; border:none; color:var(--red); width:100%; margin:10px 0; font-weight:bold; cursor:pointer;">❌ مسح</button>
     </div>
 
     <div id="kitchen" class="view"><div id="k-list"></div></div>
 </div>
 
 <script>
+    // نظام صوت النقرات
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTapSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
@@ -123,7 +157,7 @@
     const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v26');
+    const channel = ably.channels.get('jawhara-v27');
 
     let currentOrder = [], totalPrice = 0, role = '', selectedTable = '';
 
@@ -160,7 +194,7 @@
 
     function sendOrder() {
         playTapSound();
-        if(!selectedTable || currentOrder.length === 0) return;
+        if(!selectedTable || currentOrder.length === 0) { showMyAlert("اختر طاولة ووجبة!"); return; }
         channel.publish('msg', { table: selectedTable, items: currentOrder.join(' - '), total: totalPrice.toLocaleString() });
         showMyAlert("تم الإرسال للمطبخ 🚀");
         clearOrder();
@@ -192,7 +226,7 @@
         const list = document.getElementById('k-list');
         const card = document.createElement('div');
         card.className = 'order-card';
-        card.innerHTML = `<div>طاولة ${d.table}</div><div class="card-items">${d.items}</div><button class="btn-done" onclick="playTapSound(); channel.publish('msg', {type:'ready', table:'${d.table}'}); this.parentElement.remove();">✅ جاهز</button>`;
+        card.innerHTML = `<div style="font-size:22px; border-bottom:1px solid #333;">طاولة ${d.table}</div><div class="card-items">${d.items}</div><button class="btn-done" onclick="playTapSound(); channel.publish('msg', {type:'ready', table:'${d.table}'}); this.parentElement.remove();">✅ جاهز</button>`;
         list.prepend(card);
     }
 
