@@ -3,204 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الجوهرة POS Pro - النسخة الملكية 👑</title>
+    <title>الجوهرة POS 💎</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
-        :root { --gold: #ffbf00; --pink: #ff69b4; --bg: #0d1117; --key-bg: #1c2331; --key-active: #39445a; --btn-blue: #8ab4f8; --green: #00e676; }
+        :root { --bg: #0f141f; --key-bg: #1c2331; --key-text: #ffffff; --blue: #a0c3ff; --green: #00e676; --pink: #ff69b4; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { margin: 0; background: var(--bg); color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* الهيدر وشريط المعلومات */
-        .pos-header { padding: 10px 15px; background: rgba(0,0,0,0.3); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .table-indicator { background: var(--pink); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; }
-        .total-amount { color: var(--green); font-size: 28px; font-weight: 900; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
+        /* الهيدر */
+        .header { padding: 10px; display: flex; justify-content: space-between; align-items: center; background: #000; }
+        .price { color: var(--green); font-size: 26px; font-weight: 900; }
+        .table-tag { background: var(--pink); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
 
-        /* منطقة عرض الطلب */
-        .display-area { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 12px; border-radius: 12px; font-size: 22px; min-height: 55px; margin-bottom: 10px; color: var(--btn-blue); }
-        .orders-list { flex: 1; overflow-y: auto; padding-right: 5px; }
-        .order-item { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; border-right: 5px solid var(--gold); animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* الطاولات */
+        .tables { display: flex; overflow-x: auto; gap: 8px; padding: 10px; background: #000; }
+        .t-btn { flex: 0 0 45px; height: 45px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #444; }
+        .t-btn.active { background: var(--pink); color: #000; border-color: #fff; }
 
-        /* الكيبورد الاحترافي (نفس صورتك) */
-        .gboard { background: #010409; padding: 5px; border-top: 1px solid #333; }
-        .row { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
-        .k { background: var(--key-bg); flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 18px; font-weight: 600; box-shadow: 0 2px 0 #000; transition: 0.1s; }
-        .k:active { background: var(--key-active); transform: translateY(2px); box-shadow: none; }
-        .k-num { height: 38px; font-size: 15px; background: #21262d; opacity: 0.9; }
-        .k-wide { flex: 1.5; background: #30363d; }
-        .k-space { flex: 4; background: #30363d; font-size: 14px; color: #8b949e; }
-        .k-action { background: var(--btn-blue); color: #000; font-weight: 800; }
-        .k-send { background: var(--green); color: #000; font-weight: 900; }
+        /* شاشة العرض */
+        .display { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 350px; }
+        .input-view { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; font-size: 20px; color: var(--blue); border: 1px solid #333; min-height: 50px; }
+        .order-row { background: #1a202c; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; border-right: 4px solid var(--pink); }
 
-        /* شريط الطاولات العلوي */
-        .tables-bar { display: flex; overflow-x: auto; gap: 10px; padding: 10px; background: #000; border-bottom: 1px solid #222; }
-        .t-btn { flex: 0 0 45px; height: 45px; background: #21262d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #30363d; }
-        .t-btn.active { background: var(--pink); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--pink); }
+        /* الكيبورد المثبت */
+        .kb-container { position: fixed; bottom: 0; left: 0; right: 0; background: #080b12; padding: 5px; z-index: 1000; border-top: 1px solid #222; }
+        .row { display: flex; justify-content: center; gap: 3px; margin-bottom: 5px; }
+        .k { background: var(--key-bg); flex: 1; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 20px; font-weight: 600; box-shadow: 0 2px 0 #000; }
+        .k:active { background: #39445a; transform: translateY(2px); }
+        .k-num { height: 38px; font-size: 15px; background: #2a344a; opacity: 0.8; }
+        .k-wide { flex: 1.5; background: #3c4455; }
+        .btn-add { background: var(--blue); color: #000; font-weight: 800; }
+        .btn-send { background: var(--green); color: #000; font-weight: 900; height: 55px; }
 
-        #kitchen-view { display: none; padding: 10px; overflow-y: auto; height: 100vh; }
-        .kitchen-card { background: #161b22; border: 2px solid var(--pink); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        #kitchen { display: none; padding: 15px; }
+        .k-card { background: #1a202c; border: 2px solid var(--pink); border-radius: 15px; padding: 15px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="role-box" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
-    <h1 style="color:var(--gold); font-size:40px; margin:0;">الجوهرة 💎</h1>
-    <button onclick="start('cashier')" style="width:80%; padding:25px; border-radius:15px; background:var(--pink); font-weight:900; font-size:20px;">🛒 دخول الكاشير</button>
-    <button onclick="start('kitchen')" style="width:80%; padding:25px; border-radius:15px; background:none; border:2px solid #333; color:#fff; font-weight:900; font-size:20px;">👨‍🍳 دخول المطبخ</button>
+<div id="role-ui" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+    <h1 style="color:var(--pink)">الجوهرة 💎</h1>
+    <button onclick="init('cashier')" style="width:70%; padding:20px; border-radius:15px; background:var(--pink); border:none; font-weight:bold;">دخول الكاشير</button>
+    <button onclick="init('kitchen')" style="width:70%; padding:20px; border-radius:15px; background:none; border:2px solid #444; color:#fff;">دخول المطبخ</button>
 </div>
 
-<div id="cashier-view" style="display:none; height:100vh; flex-direction:column;">
-    <div class="pos-header">
-        <div class="table-indicator">طاولة: <span id="cur-t">--</span></div>
-        <div class="total-amount"><span id="cur-total">0</span> <small style="font-size:12px;">د.ع</small></div>
+<div id="cashier-ui" style="display:none; height:100%;">
+    <div class="header">
+        <div class="table-tag">طاولة: <span id="t-num">--</span></div>
+        <div class="price"><span id="total">0</span> <small>د.ع</small></div>
+    </div>
+    <div class="tables" id="t-list"></div>
+    <div class="display">
+        <div class="input-view" id="view-text">أكتب الطلب...</div>
+        <div id="basket"></div>
     </div>
 
-    <div class="tables-bar" id="t-list"></div>
-
-    <div class="display-area">
-        <div class="input-box" id="kb-display">أكتب الطلب...</div>
-        <div class="orders-list" id="items-container"></div>
-    </div>
-
-    <div class="gboard">
+    <div class="kb-container">
         <div class="row">
-            <div class="k k-num" onclick="press('1')">1</div><div class="k k-num" onclick="press('2')">2</div><div class="k k-num" onclick="press('3')">3</div><div class="k k-num" onclick="press('4')">4</div><div class="k k-num" onclick="press('5')">5</div>
-            <div class="k k-num" onclick="press('6')">6</div><div class="k k-num" onclick="press('7')">7</div><div class="k k-num" onclick="press('8')">8</div><div class="k k-num" onclick="press('9')">9</div><div class="k k-num" onclick="press('0')">0</div>
+            <div class="k k-num" onclick="k('1')">1</div><div class="k k-num" onclick="k('2')">2</div><div class="k k-num" onclick="k('3')">3</div><div class="k k-num" onclick="k('4')">4</div><div class="k k-num" onclick="k('5')">5</div>
+            <div class="k k-num" onclick="k('6')">6</div><div class="k k-num" onclick="k('7')">7</div><div class="k k-num" onclick="k('8')">8</div><div class="k k-num" onclick="k('9')">9</div><div class="k k-num" onclick="k('0')">0</div>
         </div>
         <div class="row">
-            <div class="k" onclick="press('ض')">ض</div><div class="k" onclick="press('ص')">ص</div><div class="k" onclick="press('ث')">ث</div><div class="k" onclick="press('ق')">ق</div><div class="k" onclick="press('ف')">ف</div><div class="k" onclick="press('غ')">غ</div><div class="k" onclick="press('ع')">ع</div><div class="k" onclick="press('ه')">ه</div><div class="k" onclick="press('خ')">خ</div><div class="k" onclick="press('ح')">ح</div><div class="k" onclick="press('ج')">ج</div>
+            <div class="k" onclick="k('ض')">ض</div><div class="k" onclick="k('ص')">ص</div><div class="k" onclick="k('ث')">ث</div><div class="k" onclick="k('ق')">ق</div><div class="k" onclick="k('ف')">ف</div><div class="k" onclick="k('غ')">غ</div><div class="k" onclick="k('ع')">ع</div><div class="k" onclick="k('ه')">ه</div><div class="k" onclick="k('خ')">خ</div><div class="k" onclick="k('ح')">ح</div><div class="k" onclick="k('ج')">ج</div>
         </div>
         <div class="row">
-            <div class="k" onclick="press('ش')">ش</div><div class="k" onclick="press('س')">س</div><div class="k" onclick="press('ي')">ي</div><div class="k" onclick="press('ب')">ب</div><div class="k" onclick="press('ل')">ل</div><div class="k" onclick="press('ا')">ا</div><div class="k" onclick="press('ت')">ت</div><div class="k" onclick="press('ن')">ن</div><div class="k" onclick="press('م')">م</div><div class="k" onclick="press('ك')">ك</div><div class="k" onclick="press('ط')">ط</div>
+            <div class="k" onclick="k('ش')">ش</div><div class="k" onclick="k('س')">س</div><div class="k" onclick="k('ي')">ي</div><div class="k" onclick="k('ب')">ب</div><div class="k" onclick="k('ل')">ل</div><div class="k" onclick="k('ا')">ا</div><div class="k" onclick="k('ت')">ت</div><div class="k" onclick="k('ن')">ن</div><div class="k" onclick="k('م')">م</div><div class="k" onclick="k('ك')">ك</div><div class="k" onclick="k('ط')">ط</div>
         </div>
         <div class="row">
-            <div class="k k-wide" onclick="backspace()">⌫</div>
-            <div class="k" onclick="press('ئ')">ئ</div><div class="k" onclick="press('ء')">ء</div><div class="k" onclick="press('ؤ')">ؤ</div><div class="k" onclick="press('ر')">ر</div><div class="k" onclick="press('ى')">ى</div><div class="k" onclick="press('ة')">ة</div><div class="k" onclick="press('و')">و</div><div class="k" onclick="press('ز')">ز</div><div class="k" onclick="press('ظ')">ظ</div><div class="k" onclick="press('د')">د</div>
+            <div class="k k-wide" onclick="del()">⌫</div>
+            <div class="k" onclick="k('ئ')">ئ</div><div class="k" onclick="k('ء')">ء</div><div class="k" onclick="k('ؤ')">ؤ</div><div class="k" onclick="k('ر')">ر</div><div class="k" onclick="k('ى')">ى</div><div class="k" onclick="k('ة')">ة</div><div class="k" onclick="k('و')">و</div><div class="k" onclick="k('ز')">ز</div><div class="k" onclick="k('ظ')">ظ</div><div class="k" onclick="k('د')">د</div><div class="k" onclick="k('ذ')">ذ</div>
         </div>
         <div class="row">
-            <div class="k k-wide">?123</div>
-            <div class="k k-space" onclick="press(' ')">العربية</div>
-            <div class="k k-wide k-action" onclick="addItem()">إضافة</div>
-            <div class="k k-wide k-send" onclick="sendToKitchen()">إرسال 🚀</div>
+            <div class="k" onclick="k(' ')">مسافة</div>
+            <div class="k btn-add" onclick="add()">إضافة وجبة +</div>
+        </div>
+        <div class="row">
+            <button class="k btn-send" onclick="send()">إرسال الطلب للمطبخ 🚀</button>
         </div>
     </div>
 </div>
 
-<div id="kitchen-view">
-    <h2 style="text-align:center; color:var(--gold);">👨‍🍳 طلبات المطبخ</h2>
-    <div id="kitchen-list"></div>
+<div id="kitchen" style="height:100%; overflow-y:auto;">
+    <h2 style="text-align:center; color:var(--pink)">👨‍🍳 طلبات المطبخ</h2>
+    <div id="k-cards"></div>
 </div>
 
 <script>
-    const bell = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    const channel = new Ably.Realtime('Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU').channels.get('jawhara-v110');
-    
+    const ably = new Ably.Realtime('Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU');
+    const chan = ably.channels.get('jawhara-v150');
     let text = "", basket = [], total = 0, table = "";
-    let kitchenData = JSON.parse(localStorage.getItem('j_kitch') || '[]');
+    const prices = { "كص": 1500, "برجر": 2000, "لفه": 1000, "ببسي": 500 };
 
-    // قاعدة بيانات الأسعار التلقائية
-    const priceList = { "كص": 1500, "برجر": 2000, "لفه": 1000, "ببسي": 500, "لف": 1000, "لحم": 2000, "دجاج": 1500 };
-
-    function start(role) {
-        document.getElementById('role-box').style.display = 'none';
-        if(role === 'cashier') {
-            document.getElementById('cashier-view').style.display = 'flex';
-            renderTables();
-        } else {
-            document.getElementById('kitchen-view').style.display = 'block';
-            renderKitchen();
-        }
+    function init(r) {
+        document.getElementById('role-ui').style.display = 'none';
+        if(r === 'cashier') {
+            document.getElementById('cashier-ui').style.display = 'block';
+            for(let i=1; i<=20; i++) {
+                const b = document.createElement('div'); b.className = 't-btn'; b.innerText = i;
+                b.onclick = () => { document.querySelectorAll('.t-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); table = i; document.getElementById('t-num').innerText = i; };
+                document.getElementById('t-list').appendChild(b);
+            }
+        } else { document.getElementById('kitchen').style.display = 'block'; renderK(); }
     }
 
-    function renderTables() {
-        const div = document.getElementById('t-list');
-        for(let i=1; i<=40; i++) {
-            const b = document.createElement('div');
-            b.className = 't-btn'; b.innerText = i;
-            b.onclick = () => {
-                document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active'));
-                b.classList.add('active'); table = i;
-                document.getElementById('cur-t').innerText = i;
-            };
-            div.appendChild(b);
-        }
-    }
+    function k(c) { if(text === "أكتب الطلب...") text = ""; text += c; document.getElementById('view-text').innerText = text; }
+    function del() { text = text.slice(0, -1); document.getElementById('view-text').innerText = text || "أكتب الطلب..."; }
 
-    function press(char) {
-        if(text === "أكتب الطلب...") text = "";
-        text += char;
-        document.getElementById('kb-display').innerText = text;
-    }
-
-    function backspace() {
-        text = text.slice(0, -1);
-        document.getElementById('kb-display').innerText = text || "أكتب الطلب...";
-    }
-
-    function addItem() {
+    function add() {
         if(!text || text === "أكتب الطلب...") return;
-        
-        let foundPrice = 0;
-        // البحث عن سعر الوجبة في قاعدة البيانات
-        for (let key in priceList) {
-            if (text.includes(key)) { foundPrice = priceList[key]; break; }
-        }
-        
-        // إذا الكاشير كتب رقم هو بنفسه، نستخدمه بدلاً من التلقائي
-        let manualPrice = parseInt(text.match(/\d+/) || 0);
-        let finalPrice = manualPrice > 0 ? manualPrice : foundPrice;
-
-        basket.push({ name: text, price: finalPrice });
-        total += finalPrice;
-        
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'order-item';
-        itemDiv.innerHTML = `<span>${text}</span><b style="color:var(--gold)">${finalPrice.toLocaleString()}</b>`;
-        document.getElementById('items-container').prepend(itemDiv);
-        
-        document.getElementById('cur-total').innerText = total.toLocaleString();
-        text = ""; document.getElementById('kb-display').innerText = "أكتب الطلب...";
+        let p = parseInt(text.match(/\d+/)) || 0;
+        if(p === 0) for(let s in prices) { if(text.includes(s)) { p = prices[s]; break; } }
+        basket.push({n: text, p: p}); total += p;
+        const div = document.createElement('div'); div.className = 'order-row';
+        div.innerHTML = `<span>${text}</span><b>${p.toLocaleString()}</b>`;
+        document.getElementById('basket').prepend(div);
+        document.getElementById('total').innerText = total.toLocaleString();
+        text = ""; document.getElementById('view-text').innerText = "أكتب الطلب...";
     }
 
-    function sendToKitchen() {
-        if(!table || basket.length === 0) { alert("حدد الطاولة وضف الوجبات!"); return; }
-        let summary = basket.map(b => b.name).join(' + ');
-        channel.publish('msg', { table: table, items: summary });
-        
-        // مسح الواجهة
+    function send() {
+        if(!table || basket.length === 0) return;
+        chan.publish('msg', { t: table, i: basket.map(x=>x.n).join(' + ') });
         basket = []; total = 0; text = ""; table = "";
-        document.getElementById('cur-total').innerText = "0";
-        document.getElementById('items-container').innerHTML = "";
-        document.getElementById('cur-t').innerText = "--";
-        document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active'));
-        bell.play().catch(()=>{});
+        document.getElementById('total').innerText = "0"; document.getElementById('basket').innerHTML = "";
+        document.getElementById('t-num').innerText = "--"; document.getElementById('view-text').innerText = "أكتب الطلب...";
+        document.querySelectorAll('.t-btn').forEach(x=>x.classList.remove('active'));
     }
 
-    channel.subscribe(msg => {
-        kitchenData.push(msg.data);
-        localStorage.setItem('j_kitch', JSON.stringify(kitchenData));
-        renderKitchen();
-        bell.play().catch(()=>{});
+    chan.subscribe(m => { 
+        let d = JSON.parse(localStorage.getItem('j_k') || '[]'); d.push(m.data);
+        localStorage.setItem('j_k', JSON.stringify(d)); renderK(); 
     });
 
-    function renderKitchen() {
-        const list = document.getElementById('kitchen-list');
-        if(!list) return;
-        list.innerHTML = "";
-        kitchenData.forEach((o, i) => {
-            const card = document.createElement('div');
-            card.className = 'kitchen-card';
-            card.innerHTML = `<div style="color:var(--gold); font-weight:bold;">طاولة ${o.table}</div><div style="font-size:30px; margin:15px 0; font-weight:900;">${o.items}</div><button onclick="clearK(${i})" style="width:100%; padding:15px; background:var(--green); border:none; border-radius:10px; font-weight:900; font-size:20px;">تم التجهيز ✅</button>`;
-            list.prepend(card);
+    function renderK() {
+        const div = document.getElementById('k-cards'); if(!div) return; div.innerHTML = "";
+        let d = JSON.parse(localStorage.getItem('j_k') || '[]');
+        d.forEach((o, i) => {
+            const card = document.createElement('div'); card.className = 'k-card';
+            card.innerHTML = `<div style="color:var(--pink)">طاولة ${o.t}</div><div style="font-size:24px; margin:10px 0;">${o.i}</div><button onclick="done(${i})" style="width:100%; padding:10px; background:var(--green); border:none; border-radius:8px; font-weight:bold;">تجهيز ✅</button>`;
+            div.prepend(card);
         });
     }
 
-    function clearK(i) {
-        kitchenData.splice(i, 1);
-        localStorage.setItem('j_kitch', JSON.stringify(kitchenData));
-        renderKitchen();
+    function done(i) {
+        let d = JSON.parse(localStorage.getItem('j_k') || '[]'); d.splice(i, 1);
+        localStorage.setItem('j_k', JSON.stringify(d)); renderK();
     }
 </script>
 </body>
