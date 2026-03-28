@@ -11,12 +11,12 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        #alert-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--pink); color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 800; z-index: 10000; display: none; box-shadow: 0 0 20px var(--pink); border: 2px solid #fff; }
+        #alert-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--pink); color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 800; z-index: 10000; display: none; box-shadow: 0 0 20px var(--pink); }
 
         #role-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
         .role-btn { width: 85%; padding: 30px; border-radius: 20px; border: 2px solid var(--pink); background: #000; color: var(--pink); font-size: 24px; font-weight: 800; box-shadow: 0 0 15px var(--pink); cursor: pointer; }
 
-        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold); }
+        header { padding: 15px; background: #000; text-align: center; border-bottom: 2px solid var(--gold); }
         header span { font-weight: 800; font-size: 20px; color: var(--gold); }
         
         .nav-bar { display: none; background: #000; border-bottom: 1px solid #222; }
@@ -27,27 +27,29 @@
         .view { display: none; flex-direction: column; gap: 15px; }
         .view.active { display: flex; }
 
-        /* كيبورد الطاولات الخاص */
-        .table-keypad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: var(--card-bg); padding: 10px; border-radius: 15px; border: 1px solid var(--pink); margin-bottom: 10px; }
-        .key-btn { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 16px; cursor: pointer; text-align: center; }
-        .key-btn.selected { background: var(--pink); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--pink); }
+        /* كيبورد الطاولات 1-50 */
+        .keypad-container { background: var(--card-bg); padding: 10px; border-radius: 15px; border: 1px solid var(--pink); margin-bottom: 10px; }
+        .keypad-scroll { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; padding: 5px; }
+        .key-btn { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; text-align: center; }
+        .key-btn.selected { background: var(--pink); color: #000; box-shadow: 0 0 10px var(--pink); }
 
-        /* المنيو */
-        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; margin: 15px 0 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
+        /* المنيو - صور مضمونة */
+        .section-title { color: var(--gold); font-size: 18px; font-weight: 700; margin: 10px 0; border-right: 4px solid var(--gold); padding-right: 10px; }
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; position: relative; cursor: pointer; transition: 0.1s; }
+        .menu-item-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.1s; position: relative; }
         .menu-item-card:active { transform: scale(0.92); border-color: var(--pink); }
-        .img-container { width: 100%; height: 110px; background: #222; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .img-box { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 45px; background: linear-gradient(45deg, #1a1a1a, #222); border-bottom: 1px solid #333; }
+        
         .item-details { padding: 10px; text-align: center; }
-        .item-name { display: block; font-size: 13px; font-weight: 700; color: #fff; }
+        .item-name { display: block; font-size: 13px; font-weight: 700; }
         .item-price { display: block; font-size: 12px; color: var(--gold); font-weight: 800; }
 
-        #orderSummary { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px dashed var(--gold); }
+        #orderSummary { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px dashed var(--gold); margin-top: 10px; }
         #total-price { font-size: 22px; color: var(--green); font-weight: 800; text-align: center; }
-        .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); cursor: pointer; margin-top: 10px; box-shadow: 0 0 15px var(--gold); }
+        .btn-send { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 20px; font-weight: 800; background: var(--gold); cursor: pointer; margin-top: 10px; }
 
-        #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 12px; padding: 12px; border: 1px solid var(--green); display: none; }
+        #ready-pane { background: rgba(46, 204, 113, 0.1); border-radius: 12px; padding: 12px; border: 1px solid var(--green); display: none; margin-bottom: 10px; }
         .ready-item { background: #000; padding: 10px; border-radius: 10px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 
         .order-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 2px solid var(--pink); margin-bottom: 15px; }
@@ -60,7 +62,7 @@
 <div id="alert-box"></div>
 
 <div id="role-selector">
-    <h1 style="color:var(--gold)">الجوهرة 💎 NEON</h1>
+    <h1 style="color:var(--gold)">الجوهرة 💎 POS</h1>
     <button class="role-btn" onclick="init('cashier')">🛒 واجهة الكاشير</button>
     <button class="role-btn" onclick="init('kitchen')">👨‍🍳 واجهة المطبخ</button>
 </div>
@@ -74,51 +76,52 @@
 
 <div class="container">
     <div id="cashier" class="view">
-        <div style="color:var(--pink); font-weight:bold; font-size:14px; margin-bottom:5px;">اختر رقم الطاولة:</div>
-        <div class="table-keypad" id="keypad">
-            </div>
+        <div style="color:var(--pink); font-weight:bold; font-size:14px; margin-bottom:5px;">اختر رقم الطاولة (1-50):</div>
+        <div class="keypad-container">
+            <div class="keypad-scroll" id="keypad"></div>
+        </div>
         
         <div id="ready-pane">
-            <div style="color:var(--green); text-align:center; font-weight:bold; font-size:14px;">✅ طلبات جاهزة للتسليم:</div>
+            <div style="color:var(--green); text-align:center; font-weight:bold;">✅ طلبات جاهزة للتسليم:</div>
             <div id="ready-list-cashier"></div>
         </div>
 
         <div class="section-title">الوجبات العائلية 🍗</div>
         <div class="menu-grid">
             <div class="menu-item-card" onclick="add('جامبو بلس 18', 40000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1626644496177-089337fffbc3?w=300"></div>
+                <div class="img-box">🍗</div>
                 <div class="item-details"><span class="item-name">جامبو بلس 18 قطعة</span><span class="item-price">40,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('جامبو عائلي 15', 33000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1562967914-608f82629710?w=300"></div>
+                <div class="img-box">🍟</div>
                 <div class="item-details"><span class="item-name">جامبو عائلي 15 قطعة</span><span class="item-price">33,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('كودو دجاج 12', 30000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=300"></div>
+                <div class="img-box">🥪</div>
                 <div class="item-details"><span class="item-name">كودو دجاج 12 قطعة</span><span class="item-price">30,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('وجبة القرمشة 3', 9000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1569058242253-92a9c71f9867?w=300"></div>
+                <div class="img-box">🍗</div>
                 <div class="item-details"><span class="item-name">وجبة القرمشة 3 قطع</span><span class="item-price">9,000 د.ع</span></div>
             </div>
         </div>
 
-        <div class="section-title">البرجر 🍔</div>
+        <div class="section-title">البرجر الملكي 🍔</div>
         <div class="menu-grid">
             <div class="menu-item-card" onclick="add('برجر كلاسيك', 6000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300"></div>
+                <div class="img-box">🍔</div>
                 <div class="item-details"><span class="item-name">برجر كلاسيك</span><span class="item-price">6,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('برجر دجاج', 5500)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1619177386214-41d182281898?w=300"></div>
+                <div class="img-box">🍔</div>
                 <div class="item-details"><span class="item-name">برجر دجاج</span><span class="item-price">5,500 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('دبل برجر', 8000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=300"></div>
+                <div class="img-box">🍔</div>
                 <div class="item-details"><span class="item-name">دبل برجر</span><span class="item-price">8,000 د.ع</span></div>
             </div>
             <div class="menu-item-card" onclick="add('ستيك برجر', 8000)">
-                <div class="img-container"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=300"></div>
+                <div class="img-box">🥩</div>
                 <div class="item-details"><span class="item-name">ستيك برجر</span><span class="item-price">8,000 د.ع</span></div>
             </div>
         </div>
@@ -139,13 +142,16 @@
     const clickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
     const ABLY_KEY = 'Uat5MQ.8fnfXA:4qRiadsaKzzjAcUOHdzkkQ8yxlgSY-u6c2TsELShwRU';
     const ably = new Ably.Realtime(ABLY_KEY);
-    const channel = ably.channels.get('jawhara-v22-keypad');
+    const channel = ably.channels.get('jawhara-v23-final');
     
     let currentOrder = [], totalPrice = 0, role = '', selectedTable = '';
 
     function init(r) {
         role = r;
+        // تفعيل الصوت عند أول لمسة
         bell.play().then(() => { bell.pause(); }).catch(()=>{});
+        clickSound.play().then(() => { clickSound.pause(); }).catch(()=>{});
+        
         document.getElementById('role-selector').style.display = 'none';
         document.getElementById('nav').style.display = 'flex';
         if(role === 'cashier') generateKeypad();
@@ -155,7 +161,7 @@
 
     function generateKeypad() {
         const kp = document.getElementById('keypad');
-        for(let i=1; i<=15; i++) {
+        for(let i=1; i<=50; i++) {
             const btn = document.createElement('div');
             btn.className = 'key-btn';
             btn.innerText = i;
@@ -188,10 +194,10 @@
 
     function sendOrder() {
         playClick();
-        if(!selectedTable || currentOrder.length === 0) { alert("أختر طاولة ووجبات أولاً!"); return; }
+        if(!selectedTable || currentOrder.length === 0) { showMyAlert("أختر طاولة ووجبات!"); return; }
         channel.publish('msg', { table: selectedTable, items: currentOrder.join(' - '), total: totalPrice.toLocaleString() });
         bell.play().catch(()=>{});
-        showMyAlert("تم إرسال الطلب للمطبخ 🚀");
+        showMyAlert("تم الإرسال 🚀");
         clearOrder();
     }
 
@@ -202,7 +208,7 @@
             const list = document.getElementById('ready-list-cashier');
             const item = document.createElement('div');
             item.className = 'ready-item';
-            item.innerHTML = `<span>طاولة ${d.table} جاهزة</span><button onclick="confirmDeliver(this)" style="background:var(--green); border:none; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد التسليم</button>`;
+            item.innerHTML = `<span>طاولة ${d.table} جاهزة</span><button onclick="confirmDeliver(this)" style="background:var(--green); border:none; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;">تأكيد</button>`;
             list.appendChild(item);
             bell.play().catch(()=>{});
         } else if(!d.type && role === 'kitchen') {
@@ -215,8 +221,7 @@
         playClick();
         btn.parentElement.remove();
         if(document.getElementById('ready-list-cashier').children.length === 0) document.getElementById('ready-pane').style.display = 'none';
-        showMyAlert("تم تسليم الطلب ✅");
-        bell.play().catch(()=>{});
+        showMyAlert("تم التسليم ✅");
     }
 
     function drawKitchen(d) {
